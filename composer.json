@@ -1,0 +1,27 @@
+{
+    "name": "lciolecki/zf-extensions-library",
+    "author": "Łukasz Ciołecki",
+    "description": "Extensions library for Zend Framework v1",
+    "type": "library",
+    "keywords": [
+        "php",
+        "extlib",
+        "Zend Framework"
+    ],
+    "homepage": "",
+    "license": "BSD-3-Clause",
+    "require": {
+        "php": ">=5.3.3"
+    },
+    "require-dev": {
+		"zendframework/zendframework1": "master"
+    },
+    "autoload": {
+        "psr-0": {
+            "Extlib\\": "library"
+        }
+    },
+    "include-path": [
+        "library/"
+    ]
+}
