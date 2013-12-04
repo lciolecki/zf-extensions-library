@@ -1,6 +1,6 @@
 {
     "name": "lciolecki/zf-extensions-library",
-    "author": "Łukasz Ciołecki",
+    "author": "Lukasz Ciolecki",
     "description": "Extensions library for Zend Framework v1",
     "type": "library",
     "keywords": [
@@ -13,8 +13,15 @@
     "require": {
         "php": ">=5.3.3"
     },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "http://github.com/lciolecki/cron-jobs-manager"
+        }
+    ],
     "require-dev": {
-		"zendframework/zendframework1": "master"
+        "lciolecki/php-library": "master-dev",
+        "zendframework/zendframework1": "master"
     },
     "autoload": {
         "psr-0": {

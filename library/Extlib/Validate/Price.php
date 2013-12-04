@@ -1,0 +1,119 @@
+<?php
+/**
+ * Extlib_Validate_Price - Price validator. 
+ * 
+ * @category   Extlib
+ * @package    Extlib_Validate
+ * @uses       Zend_Validate_Abstract
+ * @copyright  Copyright (c) 2011 Łukasz Ciołecki (Mart)
+ */
+class Extlib_Validate_Price extends Zend_Validate_Abstract
+{
+    const PRICE_NEGATIVE = 'priceNegative';
+    const INVALID = 'notPrice';
+    
+    /**
+     * $_messageTemplates - array of error messages 
+     * 
+     * @var array
+     */
+    protected $_messageTemplates = array(
+        self::PRICE_NEGATIVE   => "Price can not be negative",
+        self::INVALID => "Value '%value%' is not a valid format of price'",
+    );
+    
+    /**
+     * $_options - array of options 
+     * 
+     * @var array 
+     */
+    protected $_options = array(
+        'length' => 8,
+        'precision' => 2,
+        'negative' => false
+    );
+    
+    /**
+     * $_pattern - pattern for validation
+     * 
+     * @var string 
+     */
+    protected $_pattern = '/^([0-9]{1,:length:})(|\.([0-9]{1,:precision:}))$/';
+    
+    /**
+     * Class constructor
+     *
+     * @param array|Zend_Config
+     */
+    public function __construct($options = null)
+    {
+        if ($options instanceof Zend_Config) {
+            $options = $options->toArray();
+        }
+
+        if (null !== $options) {
+            $this->setOptions($options);
+        }
+            
+        $this->_pattern = str_replace(':length:', $this->_options['length'], $this->_pattern); 
+        $this->_pattern = str_replace(':precision:', $this->_options['precision'], $this->_pattern); 
+    }
+
+    /**
+     * Returns the set options
+     *
+     * @return array
+     */
+    public function getOptions()
+    {
+        return $this->_options;
+    }
+
+    /**
+     * Sets options to use
+     *
+     * @param  array $options (Optional) Options to use
+     * @return Zend_Filter_LocalizedToNormalized
+     */
+    public function setOptions(array $options = null)
+    {
+        $this->_options = $options + $this->_options;
+        return $this;
+    }
+    
+   /**
+    * Defined by Zend_Validate_Interface
+    *
+    * Returns true if and only if $value is less than max option
+    *
+    * @param  mixed $value
+    * @return boolean
+    */
+    public function isValid($value)
+    {
+        $this->_setValue($value);
+        
+        if (!is_string($value) && !is_int($value) && !is_float($value)) {
+            $this->_error(self::INVALID);
+            return false;
+        }
+        
+        if (false === $this->_options['negative'] && '-' === $value[0]) {
+            $this->_error(self::PRICE_NEGATIVE, $value);
+            return false;    
+        }
+        
+        $status = @preg_match($this->_pattern, $value);
+        if (false === $status) {
+            $this->_error(self::INVALID);
+            return false;
+        }
+
+        if (!$status) {
+            $this->_error(self::INVALID);
+            return false;
+        }
+
+        return true;        
+    }   
+}
