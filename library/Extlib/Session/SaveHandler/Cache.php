@@ -1,28 +1,33 @@
 <?php
 
-/**
- * Zend_Session_SaveHandler_Cache
- *
- * @category   Extlib
- * @package    Extlib_Session
- * @subpackage SaveHandler
- * @author Łukasz Ciołecki (mart)
- * @copyright  Copyright (c) 2012 Łukasz Ciołecki (mart)
- */
-class Extlib_Session_SaveHandler_Cache implements Zend_Session_SaveHandler_Interface
-{
-    /* Option name list */
+namespace Extlib\Session\SaveHandler;
 
+/**
+ * Session seave handler adapter for \Zend_Cache
+ *
+ * @category        Extlib
+ * @package         Extlib\Session
+ * @subpackage      Extlib\Session\SaveHandler
+ * @author          Lukasz Ciolecki <ciolecki.lukasz@gmail.com> 
+ * @copyright       Copyright (c) Lukasz Ciolecki (mart)
+ */
+class Cache implements \Zend_Session_SaveHandler_Interface
+{
+    /**
+     * Definition of options namespace
+     */
     const OPTION_PREFIX = 'prefix';
     const OPTION_CACHE = 'cache';
 
-    /* Session ID separaotr */
+    /**
+     * Session separator
+     */
     const ID_SEPARATOR = '_';
 
     /**
-     * Zend Cache
+     * \Zend Cache
      * 
-     * @var Zend_Cache_Core
+     * @var \Zend_Cache_Core
      */
     protected $cache = null;
 
@@ -36,37 +41,33 @@ class Extlib_Session_SaveHandler_Cache implements Zend_Session_SaveHandler_Inter
     /**
      * Constructor
      *
-     * @param  Zend_Config|array $config
+     * @param  \Zend_Config|array $config
      * @return void
-     * @throws Zend_Session_SaveHandler_Exception
+     * @throws \Zend_Session_SaveHandler_Exception
      */
     public function __construct($config)
     {
         if ($config instanceof Zend_Config) {
             $config = $config->toArray();
         } elseif (!is_array($config)) {
-            require_once 'Zend/Session/SaveHandler/Exception.php';
-            throw new Zend_Session_SaveHandler_Exception('$config must be an instance of Zend_Config or array.');
+            throw new \Zend_Session_SaveHandler_Exception('$config must be an instance of \Zend_Config or array.');
         }
 
         foreach ($config as $key => $value) {
-            do {
-                switch ($key) {
-                    case self::OPTION_PREFIX:
-                        $this->setSessionPrefix($value);
-                        break;
-                    case self::OPTION_CACHE:
-                        $this->setCache($value);
-                        break;
-                    default:
-                        break 2;
-                }
-                unset($config[$key]);
-            } while (false);
+            switch ($key) {
+                case self::OPTION_PREFIX:
+                    $this->setSessionPrefix($value);
+                    break;
+                case self::OPTION_CACHE:
+                    $this->setCache($value);
+                    break;
+                default:
+                    break;
+            }
         }
 
         if (null === $this->getCache()) {
-            throw new Zend_Session_SaveHandler_Exception('$cache must be an instanc of Zend_Cache_Core.');
+            throw new \Zend_Session_SaveHandler_Exception('$cache must be an instanc of Zend_Cache_Core.');
         }
     }
 
@@ -77,14 +78,15 @@ class Extlib_Session_SaveHandler_Cache implements Zend_Session_SaveHandler_Inter
      */
     public function __destruct()
     {
-        Zend_Session::writeClose();
+        \Zend_Session::writeClose();
     }
 
     /**
-     * Set Cache
-     *
+     * Set cache
+     * 
      * @param mixed $cache
-     * @return Extlib_Session_SaveHandler_Cache
+     * @return \Extlib\Session\SaveHandler\Cache
+     * @throws \Zend_Session_SaveHandler_Exception
      */
     public function setCache($cache)
     {
@@ -104,7 +106,7 @@ class Extlib_Session_SaveHandler_Cache implements Zend_Session_SaveHandler_Inter
     /**
      * Get Cache
      * 
-     * @return Zend_Cache_Core
+     * @return \Zend_Cache_Core
      */
     public function getCache()
     {
@@ -122,40 +124,15 @@ class Extlib_Session_SaveHandler_Cache implements Zend_Session_SaveHandler_Inter
     }
 
     /**
-     * Set prefix for cache session
+     * Set session prefix
      * 
      * @param string $sessionPrefix
-     * @return \Extlib_Session_SaveHandler_Cache
+     * @return \Extlib\Session\SaveHandler\Cache
      */
     public function setSessionPrefix($sessionPrefix = null)
     {
         $this->sessionPrefix = $sessionPrefix;
         return $this;
-    }
-
-    /**
-     * Open Session
-     *
-     * @param string $save_path
-     * @param string $name
-     * @return boolean
-     */
-    public function open($save_path, $name)
-    {
-        $this->_sessionSavePath = $save_path;
-        $this->_sessionName = $name;
-
-        return true;
-    }
-
-    /**
-     * Close session
-     *
-     * @return boolean
-     */
-    public function close()
-    {
-        return true;
     }
 
     /**
@@ -166,7 +143,7 @@ class Extlib_Session_SaveHandler_Cache implements Zend_Session_SaveHandler_Inter
      */
     public function read($id)
     {
-        if (!$data = $this->cache->load($this->normalizeId($id))) {
+        if (!$data = $this->getCache()->load($this->normalizeId($id))) {
             return null;
         }
 
@@ -182,8 +159,11 @@ class Extlib_Session_SaveHandler_Cache implements Zend_Session_SaveHandler_Inter
      */
     public function write($id, $data)
     {
-        return $this->cache->save(
-                        $data, $this->normalizeId($id), array(), Zend_Session::getOptions('gc_maxlifetime')
+        return $this->getCache()->save(
+            $data, 
+            $this->normalizeId($id), 
+            array(), 
+            \Zend_Session::getOptions('gc_maxlifetime')
         );
     }
 
@@ -195,11 +175,11 @@ class Extlib_Session_SaveHandler_Cache implements Zend_Session_SaveHandler_Inter
      */
     public function destroy($id)
     {
-        return $this->cache->remove($this->normalizeId($id));
+        return $this->getCache()->remove($this->normalizeId($id));
     }
 
     /**
-     * Garbage Collection
+     * Garbage Collection - implementation of interface
      *
      * @param int $maxlifetime
      * @return true
@@ -209,6 +189,28 @@ class Extlib_Session_SaveHandler_Cache implements Zend_Session_SaveHandler_Inter
         return true;
     }
 
+    /**
+     * Open Session - implementation of interface
+     *
+     * @param string $save_path
+     * @param string $name
+     * @return boolean
+     */
+    public function open($save_path, $name)
+    {
+        return true;
+    }
+
+    /**
+     * Close session - implementation of interface
+     *
+     * @return boolean
+     */
+    public function close()
+    {
+        return true;
+    }
+    
     /**
      * Method prepare id
      * 
@@ -223,5 +225,4 @@ class Extlib_Session_SaveHandler_Cache implements Zend_Session_SaveHandler_Inter
 
         return $id;
     }
-
 }

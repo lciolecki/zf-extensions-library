@@ -1,132 +1,135 @@
 <?php
+
+namespace Extlib\Session\SaveHandler;
+
 /**
- * App_Session_SaveHandler_Doctrine - Session SaveHandler standard adapter for Doctrine
- *   
- * @category   Extlib
- * @package    Extlib_Session
- * @subpackage SaveHandler
- * @author Copyright (c) 2012 Łukasz Ciołecki (mart)
+ * Session save handler adapter for Doctrine 2. 
+ * Note: your entity class must have public access to fields.
+ *
+ * @category        Extlib
+ * @package         Extlib\Session
+ * @subpackage      Extlib\Session\SaveHandler
+ * @author          Lukasz Ciolecki <ciolecki.lukasz@gmail.com> 
+ * @copyright       Copyright (c) Lukasz Ciolecki (mart)
  */
-class App_Session_SaveHandler_Doctrine2 implements Zend_Session_SaveHandler_Interface
+class Doctrine2 implements \Zend_Session_SaveHandler_Interface
 {
-    const PRIMARY_KEY_COLUMN    = 'primaryKeyColumn';
-    const DATA_COLUMN           = 'dataColumn';
-    const LIFETIME_COLUMN       = 'lifetimeColumn';
-    const MODIFIED_COLUMN       = 'modifiedColumn';
-
-    const ENITY_MANAGER         = 'enityManager';
-    const ENITY_NAME            = 'enityName';
-    const LIFETIME              = 'lifetime';
-    const OVERRIDE_LIFETIME     = 'overrideLifetime';
+    /**
+     * Definition of options namespace
+     */
+    const PRIMARY_KEY_COLUMN = 'primaryKeyColumn';
+    const DATA_COLUMN = 'dataColumn';
+    const LIFETIME_COLUMN = 'lifetimeColumn';
+    const MODIFIED_COLUMN = 'modifiedColumn';
+    const ENITY_MANAGER = 'enityManager';
+    const ENITY_NAME = 'enityName';
+    const LIFETIME = 'lifetime';
+    const OVERRIDE_LIFETIME = 'overrideLifetime';
 
     /**
-     * $_primaryKeyColumn - enity field name of primary key table
+     * Primary key column name
      * 
      * @var string
      */
-    protected $_primaryKeyColumn = null;
-    
+    protected $primaryKeyColumn = null;
+
     /**
-     * $_dataColumn - enity field name of serialize data
+     * Session content data column name
      * 
      * @var string
      */
-    protected $_dataColumn = null;
+    protected $dataColumn = null;
 
     /**
-     * $_lifetimeColumn - enity field column name of life time
+     * Session lifetime column name
      * 
      * @var string
      */
-    protected $_lifetimeColumn = null;
+    protected $lifetimeColumn = null;
 
     /**
-     * $_modifiedColumn - enity field column name of last time visit
+     * Session modify date column name
      * 
      * @var string
      */
-    protected $_modifiedColumn = null;
+    protected $modifiedColumn = null;
 
     /**
-     * $_lifetime - session lifetime
+     * Default lifetime session
      * 
      * @var int
      */
-    protected $_lifetime = false;
+    protected $lifetime = false;
 
     /**
-     * $_overrideLifetime - information about override session life time
+     * Is session life time override
      * 
      * @var boolean
      */
-    protected $_overrideLifetime = false;
+    protected $overrideLifetime = false;
 
     /**
-     * $_enityName - name of enity 
+     * Session entity name
      * 
      * @var string
      */
-    protected $_enityName = null;
+    protected $entityName = null;
 
     /**
-     * $_enityManager - instance of EnityManager
+     * Entity manager
      * 
      * @var \Doctrine\ORM\EntityManager  
      */
-    protected $_enityManager = null;
-    
+    protected $entityManager = null;
+
     /**
      * Constructor
      *
-     * @param  Zend_Config|array $config
+     * @param  \Zend_Config|array $config
      * @return void
-     * @throws Zend_Session_SaveHandler_Exception
+     * @throws \Zend_Session_SaveHandler_Exception
      */
     public function __construct($config)
     {
-        if ($config instanceof Zend_Config) {
+        if ($config instanceof \Zend_Config) {
             $config = $config->toArray();
         } elseif (!is_array($config)) {
-            require_once 'Zend/Session/SaveHandler/Exception.php';
-            throw new Zend_Session_SaveHandler_Exception('$config must be an instance of Zend_Config or array.');
+            throw new \Zend_Session_SaveHandler_Exception('$config must be an instance of Zend_Config or array.');
         }
 
         foreach ($config as $key => $value) {
-            do {
-                switch ($key) {
-                    case self::DATA_COLUMN:
-                        $this->_dataColumn = (string) $value;
-                        break;
-                    case self::LIFETIME_COLUMN:
-                        $this->_lifetimeColumn = (string) $value;
-                        break;
-                    case self::MODIFIED_COLUMN:
-                        $this->_modifiedColumn = (string) $value;
-                        break;
-                    case self::PRIMARY_KEY_COLUMN:
-                        $this->setPrimaryKeyColumn($value);
-                        break;
-                    case self::LIFETIME:
-                        $this->setLifetime($value);
-                        break;
-                    case self::OVERRIDE_LIFETIME:
-                        $this->setOverrideLifetime($value);
-                        break;
-                    case self::ENITY_NAME:
-                        $this->setEnityName($value);
-                        break;
-                    case self::ENITY_MANAGER:
-                        $this->setEnityManager($value);
-                        break;
-                    default:
-                        break 2;
-                }
-                unset($config[$key]);
-            } while (false);
+            switch ($key) {
+                case self::DATA_COLUMN:
+                    $this->dataColumn = (string) $value;
+                    break;
+                case self::LIFETIME_COLUMN:
+                    $this->lifetimeColumn = (string) $value;
+                    break;
+                case self::MODIFIED_COLUMN:
+                    $this->modifiedColumn = (string) $value;
+                    break;
+                case self::PRIMARY_KEY_COLUMN:
+                    $this->primaryKeyColumn = (string) $value;
+                    break;
+                case self::LIFETIME:
+                    $this->setLifetime($value);
+                    break;
+                case self::OVERRIDE_LIFETIME:
+                    $this->setOverrideLifetime($value);
+                    break;
+                case self::ENITY_NAME:
+                    $this->entityName = (string) $value;
+                    break;
+                case self::ENITY_MANAGER:
+                    $this->setEnityManager($value);
+                    break;
+                default:
+                    break;
+            }
         }
-        
+
         if (!$this->getEnityManager() instanceof \Doctrine\ORM\EntityManager) {
-            throw new Zend_Session_SaveHandler_Exception("EnityManager must be an instance of \Doctrine\ORM\EntityManager");
+            throw new \Zend_Session_SaveHandler_Exception(sprintf('EnityManager must be an instance of Doctrine\ORM\EntityManager, %s given.', $this->getEnityManager()));
         }
     }
 
@@ -148,18 +151,17 @@ class App_Session_SaveHandler_Doctrine2 implements Zend_Session_SaveHandler_Inte
      *
      * @param int $lifetime
      * @param boolean $overrideLifetime (optional)
-     * @return \App_Session_SaveHandler_Doctrine2
-     * @throws Zend_Session_SaveHandler_Exception
+     * @return \Extlib\Session\SaveHandler\Doctrine2
+     * @throws \Zend_Session_SaveHandler_Exception
      */
     public function setLifetime($lifetime, $overrideLifetime = null)
     {
         if ($lifetime < 0) {
-            require_once 'Zend/Session/SaveHandler/Exception.php';
-            throw new Zend_Session_SaveHandler_Exception();
+            throw new \Zend_Session_SaveHandler_Exception('$lifetime must be greater than 0.');
         } else if (empty($lifetime)) {
-            $this->_lifetime = (int) ini_get('session.gc_maxlifetime');
+            $this->lifetime = (int) ini_get('session.gc_maxlifetime');
         } else {
-            $this->_lifetime = (int) $lifetime;
+            $this->lifetime = (int) $lifetime;
         }
 
         if ($overrideLifetime != null) {
@@ -170,114 +172,38 @@ class App_Session_SaveHandler_Doctrine2 implements Zend_Session_SaveHandler_Inte
     }
 
     /**
-     * Retrieve session lifetime
-     *
-     * @return int
-     */
-    public function getLifetime()
-    {
-        return $this->_lifetime;
-    }
-
-    /**
      * Set whether or not the lifetime of an existing session should be 
      * overridden
      *
      * @param boolean $overrideLifetime
-     * @return \App_Session_SaveHandler_Doctrine2
+     * @return \Extlib\Session\SaveHandler\Doctrine2
      */
     public function setOverrideLifetime($overrideLifetime)
     {
-        $this->_overrideLifetime = (boolean) $overrideLifetime;
+        $this->overrideLifetime = (boolean) $overrideLifetime;
         return $this;
     }
 
     /**
-     * Retrieve whether or not the lifetime of an existing session should be 
-     * overridden
-     *
-     * @return boolean
-     */
-    public function getOverrideLifetime()
-    {
-        return $this->_overrideLifetime;
-    }
-
-    /**
-     * Set primary key column
-     *
-     * @param string|array $key
-     * @return \App_Session_SaveHandler_Doctrine2
-     * @throws Zend_Session_SaveHandler_Exception
-     */
-    public function setPrimaryKeyColumn($key = 'id')
-    {
-        if (is_string($key)) {
-            $this->_primaryKeyColumn = $key;
-        } else {
-            require_once 'Zend/Session/SaveHandler/Exception.php';
-            throw new Zend_Session_SaveHandler_Exception('Unable to set primary key column(s).');
-        }
-
-        return $this;
-    }
-
-    /**
-     * Retrieve primary key column
-     *
-     * @return array
-     */
-    public function getPrimaryKeyColumn()
-    {
-        return $this->_primaryKeyColumn;
-    }
-    
-    /**
-     * Set EnityManager
+     * Set entity manager
      * 
-     * @param Doctrine\ORM\EntityManager $enityManager 
-     * @return \App_Session_SaveHandler_Doctrine2
+     * @param \Doctrine\ORM\EntityManager $enityManager
+     * @return \Extlib\Session\SaveHandler\Doctrine2
      */
-    public function setEnityManager($enityManager)
+    public function setEnityManager(\Doctrine\ORM\EntityManager $enityManager)
     {
-        if (is_string($enityManager) && Zend_Registry::isRegistered($enityManager)) {
-            $this->_enityManager = Zend_Registry::get($enityManager);
-        } elseif (is_object($enityManager)) {
-            $this->_enityManager = $enityManager;   
-        }
-
+        $this->entityManager = $enityManager;
         return $this;
     }
-    
+
     /**
-     * Retrieve Enity Manager
+     * Get Enity Manager
      * 
-     * @return Doctrine\ORM\EntityManager   
+     * @return \Doctrine\ORM\EntityManager   
      */
     public function getEnityManager()
     {
-        return $this->_enityManager;
-    }    
-    /**
-     * Set session enity name
-     *
-     * @param string $name
-     * @return \App_Session_SaveHandler_Doctrine2
-     */
-    public function setEnityName($name = 'Session')
-    {
-        $this->_enityName = $name;
-        return $this;
-    }
-
-    /**
-     * Retrieve session enity name
-     *
-     * @return string
-     */
-    public function getEnityName()
-    {
-        return $this->_tableName;
+        return $this->entityManager;
     }
 
     /**
@@ -305,24 +231,21 @@ class App_Session_SaveHandler_Doctrine2 implements Zend_Session_SaveHandler_Inte
     /**
      * Read session data
      *
-     * @param string $id Session identifier
-     * @return string Session data
+     * @param string $id
+     * @return string
      */
     public function read($id)
     {
-        $return = '';
-
-        $record = $this->_enityManager->getRepository($this->_enityName)->findOneBy(array($this->_primaryKeyColumn => $id));
-
-        if (null !== $record) {
-            if ($this->_getExpirationTime($record) > time()) {
-                $return = $record->{$this->_dataColumn};
+        $session = $this->entityManager->find($this->entityManager, $id);
+        if (null !== $session) {
+            if ($this->_getExpirationTime($session) > time()) {
+                return $session->{$this->dataColumn};
             } else {
                 $this->destroy($id);
             }
         }
 
-        return $return;
+        return '';
     }
 
     /**
@@ -334,21 +257,21 @@ class App_Session_SaveHandler_Doctrine2 implements Zend_Session_SaveHandler_Inte
      */
     public function write($id, $data)
     {
-        $session = $this->_enityManager->getRepository($this->_enityName)->findOneBy(array($this->_primaryKeyColumn => $id));
+        $session = $this->entityManager->find($this->entityManager, $id);
         if (null === $session) {
-            $session = new $this->_enityName();
-            $session->{$this->_primaryKeyColumn} = $id;
+            $session = new $this->entityName();
+            $session->{$this->primaryKeyColumn} = $id;
         }
 
-        $session->{$this->_dataColumn} = $data;
-        $session->{$this->_lifetimeColumn} = $this->_lifetime;
-        $session->{$this->_modifiedColumn} = time();
-        $this->_enityManager->persist($session);
-        
+        $session->{$this->dataColumn} = $data;
+        $session->{$this->lifetimeColumn} = $this->lifetime;
+        $session->{$this->modifiedColumn} = time();
+        $this->entityManager->persist($session);
+
         try {
-            $this->_enityManager->flush();
+            $this->entityManager->flush();
             return true;
-        } catch (Doctrine\ORM\OptimisticLockException $exc) {
+        } catch (\Doctrine\ORM\OptimisticLockException $exc) {
             return false;
         }
     }
@@ -361,13 +284,13 @@ class App_Session_SaveHandler_Doctrine2 implements Zend_Session_SaveHandler_Inte
      */
     public function destroy($id)
     {
-        $record = $this->_enityManager->getRepository($this->_enityName)->findOneBy(array($this->_primaryKeyColumn => $id));
-        if (false !== $record) {
+        $session = $this->entityManager->find($this->entityManager, $id);
+        if (false !== $session) {
             try {
-                $this->_enityManager->remove($record);
-                $this->_enityManager->flush();
+                $this->entityManager->remove($session);
+                $this->entityManager->flush();
                 return true;
-            } catch (Doctrine\ORM\OptimisticLockException $exc) {
+            } catch (\Doctrine\ORM\OptimisticLockException $exc) {
                 return false;
             }
         }
@@ -383,17 +306,17 @@ class App_Session_SaveHandler_Doctrine2 implements Zend_Session_SaveHandler_Inte
      */
     public function gc($maxlifetime)
     {
-        $sessions = $this->_enityManager->getRepository($this->_enityName)->findAll();
+        $sessions = $this->entityManager->getRepository($this->entityName)->findAll();
         foreach ($sessions as $session) {
             if ($this->_getExpirationTime($session) < time()) {
-                $this->_enityManager->remove($session);
+                $this->entityManager->remove($session);
             }
         }
 
         try {
-            $this->_enityManager->flush();
+            $this->entityManager->flush();
             return true;
-        } catch (Doctrine\ORM\OptimisticLockException $exc) {
+        } catch (\Doctrine\ORM\OptimisticLockException $exc) {
             return false;
         }
     }
@@ -406,13 +329,11 @@ class App_Session_SaveHandler_Doctrine2 implements Zend_Session_SaveHandler_Inte
      */
     protected function _getLifetime($record)
     {
-        $return = $this->_lifetime;
-
-        if (!$this->_overrideLifetime) {
-            $return = (int) $record->{$this->_lifetimeColumn};
+        if (!$this->overrideLifetime) {
+            return $record->{$this->lifetimeColumn};
         }
 
-        return $return;
+        return $this->lifetime;
     }
 
     /**
@@ -423,6 +344,6 @@ class App_Session_SaveHandler_Doctrine2 implements Zend_Session_SaveHandler_Inte
      */
     protected function _getExpirationTime($record)
     {
-        return (int) $record->{$this->_modifiedColumn} + $this->_getLifetime($record);
+        return (int) $record->{$this->modifiedColumn} + $this->_getLifetime($record);
     }
 }

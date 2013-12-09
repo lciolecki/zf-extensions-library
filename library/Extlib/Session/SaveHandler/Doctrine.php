@@ -1,65 +1,74 @@
 <?php
-/**
- * Extlib_Session_SaveHandler_Doctrine - Session SaveHandler standard adapter for Doctrine
- *   
- * @category   Extlib
- * @package    Extlib_Session
- * @subpackage SaveHandler
- * @author Matthew Lurz
- * @Modification Copyright (c) 2010 Łukasz Ciołecki (mart)
- */
-class Extlib_Session_SaveHandler_Doctrine implements Zend_Session_SaveHandler_Interface
-{
-    const PRIMARY_KEY_COLUMN    = 'primaryKeyColumn';
-    const DATA_COLUMN           = 'dataColumn';
-    const LIFETIME_COLUMN       = 'lifetimeColumn';
-    const MODIFIED_COLUMN       = 'modifiedColumn';
 
-    const TABLE_NAME            = 'tableName';
-    const LIFETIME              = 'lifetime';
-    const OVERRIDE_LIFETIME     = 'overrideLifetime';
+namespace Extlib\Session\SaveHandler;
+
+/**
+ * Session save handler adapter for Doctrine 1.2
+ *
+ * @category        Extlib
+ * @package         Extlib\Session
+ * @subpackage      Extlib\Session\SaveHandler
+ * @author          Lukasz Ciolecki <ciolecki.lukasz@gmail.com> 
+ * @copyright       Copyright (c) Lukasz Ciolecki (mart)
+ */
+class Doctrine implements \Zend_Session_SaveHandler_Interface
+{
+    /**
+     * Definition of options namespace
+     */
+    const PRIMARY_KEY_COLUMN = 'primaryKeyColumn';
+    const DATA_COLUMN = 'dataColumn';
+    const LIFETIME_COLUMN = 'lifetimeColumn';
+    const MODIFIED_COLUMN = 'modifiedColumn';
+    const TABLE_NAME = 'tableName';
+    const LIFETIME = 'lifetime';
+    const OVERRIDE_LIFETIME = 'overrideLifetime';
 
     /**
+     * Primary key column name
+     * 
      * @var string
      */
     protected $_primaryKeyColumn = null;
-    
+
     /**
+     * Session content data column name
+     * 
      * @var string
      */
     protected $_dataColumn = null;
 
     /**
+     * Session lifetime column name
+     * 
      * @var string
      */
     protected $_lifetimeColumn = null;
 
     /**
+     * Session modify date column name
+     * 
      * @var string
      */
     protected $_modifiedColumn = null;
 
     /**
+     * Default lifetime session
+     * 
      * @var int
      */
     protected $_lifetime = false;
 
     /**
+     * Is session life time override
+     * 
      * @var boolean
      */
     protected $_overrideLifetime = false;
 
     /**
-     * @var string
-     */
-    protected $_sessionName = null;
-
-    /**
-     * @var string
-     */
-    protected $_sessionSavePath = null;
-
-    /**
+     * Session table name
+     * 
      * @var string
      */
     protected $_tableName = null;
@@ -67,48 +76,44 @@ class Extlib_Session_SaveHandler_Doctrine implements Zend_Session_SaveHandler_In
     /**
      * Constructor
      *
-     * @param  Zend_Config|array $config
+     * @param  \Zend_Config|array $config
      * @return void
-     * @throws Zend_Session_SaveHandler_Exception
+     * @throws \Zend_Session_SaveHandler_Exception
      */
     public function __construct($config)
     {
-        if ($config instanceof Zend_Config) {
+        if ($config instanceof \Zend_Config) {
             $config = $config->toArray();
         } elseif (!is_array($config)) {
-            require_once 'Zend/Session/SaveHandler/Exception.php';
-            throw new Zend_Session_SaveHandler_Exception('$config must be an instance of Zend_Config or array.');
+            throw new \Zend_Session_SaveHandler_Exception('$config must be an instance of Zend_Config or array.');
         }
 
         foreach ($config as $key => $value) {
-            do {
-                switch ($key) {
-                    case self::DATA_COLUMN:
-                        $this->_dataColumn = (string) $value;
-                        break;
-                    case self::LIFETIME_COLUMN:
-                        $this->_lifetimeColumn = (string) $value;
-                        break;
-                    case self::MODIFIED_COLUMN:
-                        $this->_modifiedColumn = (string) $value;
-                        break;
-                    case self::PRIMARY_KEY_COLUMN:
-                        $this->setPrimaryKeyColumn($value);
-                        break;
-                    case self::LIFETIME:
-                        $this->setLifetime($value);
-                        break;
-                    case self::OVERRIDE_LIFETIME:
-                        $this->setOverrideLifetime($value);
-                        break;
-                    case self::TABLE_NAME:
-                        $this->setTableName($value);
-                        break;
-                    default:
-                        break 2;
-                }
-                unset($config[$key]);
-            } while (false);
+            switch ($key) {
+                case self::DATA_COLUMN:
+                    $this->_dataColumn = (string) $value;
+                    break;
+                case self::LIFETIME_COLUMN:
+                    $this->_lifetimeColumn = (string) $value;
+                    break;
+                case self::MODIFIED_COLUMN:
+                    $this->_modifiedColumn = (string) $value;
+                    break;
+                case self::PRIMARY_KEY_COLUMN:
+                    $this->_primaryKeyColumn = (string) $value;
+                    break;
+                case self::TABLE_NAME:
+                    $this->_tableName = (string) $value;
+                    break;
+                case self::LIFETIME:
+                    $this->_lifetime = $this->setLifetime($value);
+                    break;
+                case self::OVERRIDE_LIFETIME:
+                    $this->_overrideLifetime = $this->setOverrideLifetime($value);
+                    break;
+                default:
+                    break;
+            }
         }
     }
 
@@ -119,7 +124,7 @@ class Extlib_Session_SaveHandler_Doctrine implements Zend_Session_SaveHandler_In
      */
     public function __destruct()
     {
-        Zend_Session::writeClose();
+        \Zend_Session::writeClose();
     }
 
     /**
@@ -127,17 +132,16 @@ class Extlib_Session_SaveHandler_Doctrine implements Zend_Session_SaveHandler_In
      * existing session should be overridden
      *
      * $lifetime === false resets lifetime to session.gc_maxlifetime
-     *
+     * 
      * @param int $lifetime
-     * @param boolean $overrideLifetime (optional)
-     * @return Zend_Session_SaveHandler_Doctrine
-     * @throws Zend_Session_SaveHandler_Exception
+     * @param boolean $overrideLifetime
+     * @return \Extlib\Session\SaveHandler\Doctrine
+     * @throws \Zend_Session_SaveHandler_Exception
      */
     public function setLifetime($lifetime, $overrideLifetime = null)
     {
         if ($lifetime < 0) {
-            require_once 'Zend/Session/SaveHandler/Exception.php';
-            throw new Zend_Session_SaveHandler_Exception();
+            throw new \Zend_Session_SaveHandler_Exception('$lifetime must be greater than 0.');
         } else if (empty($lifetime)) {
             $this->_lifetime = (int) ini_get('session.gc_maxlifetime');
         } else {
@@ -152,21 +156,11 @@ class Extlib_Session_SaveHandler_Doctrine implements Zend_Session_SaveHandler_In
     }
 
     /**
-     * Retrieve session lifetime
-     *
-     * @return int
-     */
-    public function getLifetime()
-    {
-        return $this->_lifetime;
-    }
-
-    /**
      * Set whether or not the lifetime of an existing session should be 
      * overridden
-     *
+     * 
      * @param boolean $overrideLifetime
-     * @return Zend_Session_SaveHandler_Doctrine
+     * @return \Extlib\Session\SaveHandler\Doctrine
      */
     public function setOverrideLifetime($overrideLifetime)
     {
@@ -175,69 +169,7 @@ class Extlib_Session_SaveHandler_Doctrine implements Zend_Session_SaveHandler_In
     }
 
     /**
-     * Retrieve whether or not the lifetime of an existing session should be 
-     * overridden
-     *
-     * @return boolean
-     */
-    public function getOverrideLifetime()
-    {
-        return $this->_overrideLifetime;
-    }
-
-    /**
-     * Set primary key column
-     *
-     * @param string|array $key
-     * @return Zend_Session_SaveHandler_Doctrine
-     * @throws Zend_Session_SaveHandler_Exception
-     */
-    public function setPrimaryKeyColumn($key = 'id')
-    {
-        if (is_string($key)) {
-            $this->_primaryKeyColumn = $key;
-        } else {
-            require_once 'Zend/Session/SaveHandler/Exception.php';
-            throw new Zend_Session_SaveHandler_Exception('Unable to set primary key column(s).');
-        }
-
-        return $this;
-    }
-
-    /**
-     * Retrieve primary key column
-     *
-     * @return array
-     */
-    public function getPrimaryKeyColumn()
-    {
-        return $this->_primaryKeyColumn;
-    }
-
-    /**
-     * Set session table name
-     *
-     * @param string $name
-     * @return Zend_Session_SaveHandler_Doctrine
-     */
-    public function setTableName($name = 'Session')
-    {
-        $this->_tableName = $name;
-        return $this;
-    }
-
-    /**
-     * Retrieve session table name
-     *
-     * @return string
-     */
-    public function getTableName()
-    {
-        return $this->_tableName;
-    }
-
-    /**
-     * Open Session
+     * Open Session - implementation of interface
      *
      * @param string $savePath
      * @param string $name
@@ -245,13 +177,11 @@ class Extlib_Session_SaveHandler_Doctrine implements Zend_Session_SaveHandler_In
      */
     public function open($savePath, $name)
     {
-        $this->_sessionSavePath = $savePath;
-        $this->_sessionName     = $name;
         return true;
     }
 
     /**
-     * Close session
+     * Close session - implementation of interface
      *
      * @return boolean
      */
@@ -263,23 +193,21 @@ class Extlib_Session_SaveHandler_Doctrine implements Zend_Session_SaveHandler_In
     /**
      * Read session data
      *
-     * @param string $id Session identifier
-     * @return string Session data
+     * @param string $id
+     * @return string
      */
     public function read($id)
     {
-        $return = '';
-
-        $record = Doctrine::getTable($this->_tableName)->find($id);
-        if (false !== $record) {
-            if ($this->_getExpirationTime($record) > time()) {
-                $return = $record->{$this->_dataColumn};
+        $session = \Doctrine::getTable($this->_tableName)->find($id);
+        if (false !== $session) {
+            if ($this->_getExpirationTime($session) > time()) {
+                return $session->{$this->_dataColumn};
             } else {
                 $this->destroy($id);
             }
         }
 
-        return $return;
+        return '';
     }
 
     /**
@@ -291,9 +219,7 @@ class Extlib_Session_SaveHandler_Doctrine implements Zend_Session_SaveHandler_In
      */
     public function write($id, $data)
     {
-        $return = false;
-
-        $session = Doctrine::getTable($this->_tableName)->find($id);
+        $session = \Doctrine::getTable($this->_tableName)->find($id);
         if (false === $session) {
             $session = new $this->_tableName();
             $session->{$this->_primaryKeyColumn} = $id;
@@ -307,7 +233,7 @@ class Extlib_Session_SaveHandler_Doctrine implements Zend_Session_SaveHandler_In
             return true;
         }
 
-        return $return;
+        return false;
     }
 
     /**
@@ -320,7 +246,7 @@ class Extlib_Session_SaveHandler_Doctrine implements Zend_Session_SaveHandler_In
     {
         $return = false;
 
-        $record = Doctrine::getTable($this->_tableName)->find($id);
+        $record = \Doctrine::getTable($this->_tableName)->find($id);
         if (false !== $record) {
             if ($record->delete()) {
                 $return = true;
@@ -338,7 +264,7 @@ class Extlib_Session_SaveHandler_Doctrine implements Zend_Session_SaveHandler_In
      */
     public function gc($maxlifetime)
     {
-        $sessions = Doctrine::getTable($this->_tableName)->findAll();
+        $sessions = \Doctrine::getTable($this->_tableName)->findAll();
         foreach ($sessions as $session) {
             if ($this->_getExpirationTime($session) < time()) {
                 $session->delete();
@@ -351,10 +277,10 @@ class Extlib_Session_SaveHandler_Doctrine implements Zend_Session_SaveHandler_In
     /**
      * Retrieve session lifetime
      *
-     * @param Doctrine_Record $record
+     * @param \Doctrine_Record $record
      * @return int
      */
-    protected function _getLifetime(Doctrine_Record $record)
+    public function _getLifetime(\Doctrine_Record $record)
     {
         $return = $this->_lifetime;
 
@@ -368,10 +294,10 @@ class Extlib_Session_SaveHandler_Doctrine implements Zend_Session_SaveHandler_In
     /**
      * Retrieve session expiration time
      *
-     * @param Doctrine_Record $record
+     * @param \Doctrine_Record $record
      * @return int
      */
-    protected function _getExpirationTime(Doctrine_Record $record)
+    protected function _getExpirationTime(\Doctrine_Record $record)
     {
         return (int) $record->{$this->_modifiedColumn} + $this->_getLifetime($record);
     }
