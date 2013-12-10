@@ -12,8 +12,9 @@ namespace Extlib\Traits;
  */
 trait GetterAndSetter
 {
+
     /**
-     * Magic __call
+     * Magic __call - set/get property
      * 
      * @param string $method
      * @param array $args
@@ -43,10 +44,11 @@ trait GetterAndSetter
     }
 
     /**
-     * Magic __set 
+     * Magic __set - set property 
      * 
      * @param string $property
      * @param miexed $value
+     * @return \Extlib\Traits\GetterAndSetter
      * @throws \InvalidArgumentException
      */
     public function __set($property, $value)
@@ -54,16 +56,18 @@ trait GetterAndSetter
         $method = 'set' . ucfirst($property);
 
         if (method_exists($this, $method)) {
-            return $this->$method($value);
+            $this->$method($value);
         } else if (property_exists($this, $property)) {
             $this->$property = $value;
         } else {
             throw new \InvalidArgumentException(sprintf("Call to undefined property '%s' in class '%s'.", $property, get_class($this)));
         }
+
+        return $this;
     }
 
     /**
-     * Magic __get
+     * Magic __get - get property
      * 
      * @param string $property
      * @throws \InvalidArgumentException
@@ -80,5 +84,4 @@ trait GetterAndSetter
             throw new \InvalidArgumentException(sprintf("Call to undefined property '%s' in class '%s'.", $property, get_class($this)));
         }
     }
-
 }
