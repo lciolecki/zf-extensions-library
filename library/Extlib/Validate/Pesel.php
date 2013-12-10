@@ -1,58 +1,62 @@
-<?php 
+<?php
+
+namespace Extlib\Validate;
+
 /**
- * Extlib_Validate_Pesel - Pesel class validator
+ * Polish universal electronic system for registration of the population number validate class
  *
- * @category   Zend
- * @package    Zend_Validate
- * @copyright  Copyright (c) 2012 Łukasz Ciołecki (mart)
+ * @category    Extlib
+ * @package     Extlib\Validate
+ * @author      Lukasz Ciolecki <ciolecki.lukasz@gmail.com>
+ * @copyright   Copyright (c) 2011 Lukasz Ciolecki (mart)
  */
-class Extlib_Validate_Pesel extends Zend_Validate_Abstract
+class Pesel extends \Zend_Validate_Abstract
 {
-    const INVALID_PESEL = 'invalidPesel';
-    
     /**
-     * $_messageTemplates - array of error messages
+     * Error message key
+     */
+    const INVALID_PESEL = 'invalidPesel';
+
+    /**
+     * Array of error messages
      * 
      * @var array
      */
-    protected $_messageTemplates = array (
-        self::INVALID_PESEL => "Number '%value%' is not a valid PESEL", 
+    protected $_messageTemplates = array(
+        self::INVALID_PESEL => "Number '%value%' is not a valid PESEL.",
     );
-    
+
     /**
-     * $_weights - Array of weights
+     * Array of weights
      *
      * @var array 
      */
     protected $_weights = array(1, 3, 7, 9, 1, 3, 7, 9, 1, 3);
-    
-   /**
-    * Defined by Zend_Validate_Interface
-    *
-    * Returns true if and only if $value is less than max option
-    *
-    * @param  mixed $value
-    * @return boolean
-    */
+
+    /**
+     * Defined by Zend_Validate_Interface
+     * 
+     * @see Zend_Validate_Interface::isValid()
+     */
     public function isValid($value)
     {
         if (strlen($value) != 11) {
             $this->_error(self::INVALID_PESEL, $value);
-            return false;    
+            return false;
         }
-        
+
         $intSum = 0;
 
         for ($i = 0; $i < 10; $i++) {
-            $intSum += $this->_weights[$i] * $value[$i];     
+            $intSum += $this->_weights[$i] * $value[$i];
         }
-        
-        $int = 10 - ($intSum % 10);
-        $intControlNr = ($int == 10) ? 0 : $int; 
-        
+
+        $int = 10 - $intSum % 10;
+        $intControlNr = ($int == 10) ? 0 : $int;
+
         if ($intControlNr != $value[10]) {
             $this->_error(self::INVALID_PESEL, $value);
-            return false;      
+            return false;
         }
 
         return true;

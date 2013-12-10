@@ -1,46 +1,50 @@
-<?php 
+<?php
+
+namespace Extlib\Validate;
+
 /**
- * Extlib_Validate_Regon - Regon number class validator
- *
- * @category   Zend
- * @package    Zend_Validate
- * @copyright  Copyright (c) 2012 Łukasz Ciołecki (mart)
+ * Polish journal of the national register of economic entities number validate class
+ * 
+ * @category    Extlib
+ * @package     Extlib\Validate
+ * @author      Lukasz Ciolecki <ciolecki.lukasz@gmail.com>
+ * @copyright   Copyright (c) 2011 Lukasz Ciolecki (mart)
  */
-class Extlib_Validate_Regon extends Zend_Validate_Abstract
+class Regon extends \Zend_Validate_Abstract
 {
-    const INVALID_REGON = 'invalidRegon';
-    
     /**
-     * $_messageTemplates - array of error messages
+     * Error message keys
+     */
+    const INVALID_REGON = 'invalidRegon';
+
+    /**
+     * Array of error messages
      * 
      * @var array
      */
     protected $_messageTemplates = array(
-        self::INVALID_REGON => "Number '%value%' is not a valid REGON", 
+        self::INVALID_REGON => "Number '%value%' is not a valid REGON.",
     );
-    
+
     /**
-     * $_steps - Array of weight for len = 9
+     * Array of weight for len = 9
      *
      * @var array 
      */
     protected $_weights9 = array(8, 9, 2, 3, 4, 5, 6, 7);
-    
+
     /**
-     * $_steps - Array of weight for len = 14
+     * Array of weight for len = 14
      *
      * @var array 
      */
     protected $_weights14 = array(2, 4, 8, 5, 0, 9, 7, 3, 6, 1, 2, 4, 8);
-    
-   /**
-    * Defined by Zend_Validate_Interface
-    *
-    * Returns true if and only if $value is less than max option
-    *
-    * @param  mixed $value
-    * @return boolean
-    */
+
+    /**
+     * Defined by Zend_Validate_Interface
+     * 
+     * @see Zend_Validate_Interface::isValid()
+     */
     public function isValid($value)
     {
         if (strlen($value) == 9) {
@@ -49,23 +53,23 @@ class Extlib_Validate_Regon extends Zend_Validate_Abstract
             $weights = $this->_weights14;
         } else {
             $this->_error(self::INVALID_REGON, $value);
-            return false;  
-        } 
-        
+            return false;
+        }
+
         $sum = 0;
-        
-        for($i = 0;$i < count($weights); $i++){
+
+        for ($i = 0; $i < count($weights); $i++) {
             $sum += $weights[$i] * $value[$i];
         }
-        
+
         $int = $sum % 11;
         $checksum = ($int == 10) ? 0 : $int;
 
         if ($checksum != $value[count($weights)]) {
             $this->_error(self::INVALID_REGON, $value);
-            return false;  
+            return false;
         }
-        
-        return true; 
+
+        return true;
     }
 }

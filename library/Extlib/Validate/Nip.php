@@ -1,58 +1,65 @@
-<?php 
+<?php
+
+namespace Extlib\Validate;
+
 /**
- * Extlib_Validate_Nip - Nip class validator
+ * Polish tax identyfication number validate class
  *
- * @category   Zend
- * @package    Zend_Validate
- * @copyright  Copyright (c) 2012 Łukasz Ciołecki (mart)
+ * @category    Extlib
+ * @package     Extlib\Validate
+ * @author      Lukasz Ciolecki <ciolecki.lukasz@gmail.com>
+ * @copyright   Copyright (c) 2011 Lukasz Ciolecki (mart)
  */
-class Extlib_Validate_Nip extends Zend_Validate_Abstract
+class Nip extends \Zend_Validate_Abstract
 {
-    const INVALID_NIP = 'invalidNip';
-    
     /**
-     * $_messageTemplates - array of error messages
+     * Error message keys
+     */
+    const INVALID_NIP = 'invalidNip';
+
+    /**
+     * Array of error messages
      * 
      * @var array
      */
-    protected $_messageTemplates = array (
-        self::INVALID_NIP => "Number '%value%' is not a valid NIP", 
+    protected $_messageTemplates = array(
+        self::INVALID_NIP => "Number '%value%' is not a valid NIP",
     );
-    
+
     /**
-     * $_weights - Array of weights
+     * Array of weights
      *
      * @var array 
      */
     protected $_weights = array(6, 5, 7, 2, 3, 4, 5, 6, 7);
-    
-   /**
-    * Defined by Zend_Validate_Interface
-    *
-    * Returns true if and only if $value is less than max option
-    *
-    * @param  mixed $value
-    * @return boolean
-    */
+
+    /**
+     * Defined by Zend_Validate_Interface
+     *
+     * Returns true if and only if $value is less than max option
+     *
+     * @param  mixed $value
+     * @return boolean
+     */
     public function isValid($value)
     {
         if (strlen($value) != 10) {
             $this->_error(self::INVALID_NIP, $value);
-            return false;    
+            return false;
         }
-        
-        $intSum=0;
+
+        $intSum = 0;
 
         for ($i = 0; $i < 9; $i++) {
-            $intSum += $this->_weights[$i] * $value[$i];     
+            $intSum += $this->_weights[$i] * $value[$i];
         }
-        
-        $int = $intSum % 11; 
-        $intControlNr = ($int == 10) ? 0 : $int; 
-        
+
+        $int = $intSum % 11;
+        $intControlNr = ($int == 10) ? 0 : $int;
+
         if ($intControlNr != $value[9]) {
             $this->_error(self::INVALID_NIP, $value);
-            return false;      
+            return false;
         }
 
         return true;
