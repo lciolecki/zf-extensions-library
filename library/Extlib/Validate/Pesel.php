@@ -40,6 +40,13 @@ class Pesel extends \Zend_Validate_Abstract
      */
     public function isValid($value)
     {
+        if (is_float($value) || is_array($value) || is_object($value) || is_callable($value)) {
+            $this->_error(self::INVALID_PESEL, $value);
+            return false;
+        }
+        
+        $value = (string) $value;
+        
         if (strlen($value) != 11) {
             $this->_error(self::INVALID_PESEL, $value);
             return false;

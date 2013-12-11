@@ -16,19 +16,18 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "http://github.com/lciolecki/cron-jobs-manager"
+            "url": "http://github.com/lciolecki/php-library"
         }
     ],
     "require-dev": {
         "lciolecki/php-library": "master-dev",
-        "zendframework/zendframework1": "master"
+        "zendframework/zendframework1": "1.12.*"
     },
     "autoload": {
         "psr-0": {
-            "Extlib\\": "library"
+ 
+            "Extlib\\": "library",
+            "ExtlibTest\\": "tests"
         }
-    },
-    "include-path": [
-        "library/"
-    ]
+    }
 }
