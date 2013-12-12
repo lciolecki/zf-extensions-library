@@ -47,9 +47,10 @@ class Regon extends \Zend_Validate_Abstract
      */
     public function isValid($value)
     {
-        if (strlen($value) == 9) {
+        $value = (string) $value;
+        if (strlen($value) === 9) {
             $weights = $this->_weights9;
-        } elseif (strlen($value) == 14) {
+        } elseif (strlen($value) === 14) {
             $weights = $this->_weights14;
         } else {
             $this->_error(self::INVALID_REGON, $value);
@@ -63,9 +64,9 @@ class Regon extends \Zend_Validate_Abstract
         }
 
         $int = $sum % 11;
-        $checksum = ($int == 10) ? 0 : $int;
+        $checksum = ($int === 10) ? 0 : $int;
 
-        if ($checksum != $value[count($weights)]) {
+        if ($checksum !== (int) $value[count($weights)]) {
             $this->_error(self::INVALID_REGON, $value);
             return false;
         }

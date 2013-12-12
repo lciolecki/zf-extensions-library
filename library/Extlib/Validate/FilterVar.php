@@ -29,7 +29,8 @@ class FilterVar extends \Zend_Validate_Abstract
         FILTER_VALIDATE_EMAIL,
         FILTER_VALIDATE_FLOAT,
         FILTER_VALIDATE_INT,
-        FILTER_VALIDATE_URL
+        FILTER_VALIDATE_URL,
+        FILTER_VALIDATE_IP
     );
 
     /**

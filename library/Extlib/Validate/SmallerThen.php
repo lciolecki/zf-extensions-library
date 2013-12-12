@@ -64,7 +64,7 @@ class SmallerThen extends \Zend_Validate_Abstract
      * @param mixed $context
      * @return boolean
      */
-    public function isValid($value, $context = null)
+    public function isValid($value, $context = array())
     {
         if (!array_key_exists($this->_baseValueToken, $context)) {
             throw new \Zend_Validate_Exception('Base value was not found');

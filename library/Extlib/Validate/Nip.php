@@ -43,7 +43,8 @@ class Nip extends \Zend_Validate_Abstract
      */
     public function isValid($value)
     {
-        if (strlen($value) != 10) {
+        $value = (string) $value;
+        if (strlen($value) !== 10) {
             $this->_error(self::INVALID_NIP, $value);
             return false;
         }
@@ -55,9 +56,9 @@ class Nip extends \Zend_Validate_Abstract
         }
 
         $int = $intSum % 11;
-        $intControlNr = ($int == 10) ? 0 : $int;
+        $intControlNr = ($int === 10) ? 0 : $int;
 
-        if ($intControlNr != $value[9]) {
+        if ($intControlNr !== (int) $value[9]) {
             $this->_error(self::INVALID_NIP, $value);
             return false;
         }

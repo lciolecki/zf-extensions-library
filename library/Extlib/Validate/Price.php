@@ -99,7 +99,7 @@ class Price extends \Zend_Validate_Abstract
     {
         $this->_setValue($value);
 
-        if (!is_string($value) && !is_int($value) && !is_float($value)) {
+        if (!$value || !is_string($value) && !is_int($value) && !is_float($value)) {
             $this->_error(self::INVALID_PRICE);
             return false;
         }

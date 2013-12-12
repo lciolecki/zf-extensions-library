@@ -1,13 +1,18 @@
 <?php
 /**
- * Extlib_Validate_Doctrine2_Abstract - Class for Doctrine2 record validation.
+ * @see Zend_Validate_Abstract
+ */
+require_once 'Zend/Validate/Abstract.php';
+
+/**
+ * Extlib_Validate_Doctrine2_Abstract - Class for Doctrine2 record validation
  *
  * @category   Extlib
  * @package    Extlib_Validate
  * @uses       Extlib_Validate_Abstract
  * @copyright  Copyright (c) 2012 Łukasz Ciołecki (Mart)
  */
-abstract class Extlib_Validate_Doctrine2_Abstract extends Zend_Validate_Abstract
+abstract class App_Validate_Doctrine2_Abstract extends Zend_Validate_Abstract
 {
     /**
      * Error constants
@@ -16,8 +21,6 @@ abstract class Extlib_Validate_Doctrine2_Abstract extends Zend_Validate_Abstract
     const ERROR_RECORD_FOUND    = 'recordFound';
 
     /**
-     * $_messageTemplates - array of error messages
-     * 
      * @var array Message templates
      */
     protected $_messageTemplates = array(
@@ -26,11 +29,11 @@ abstract class Extlib_Validate_Doctrine2_Abstract extends Zend_Validate_Abstract
     );
 
     /**
-     * $_entity - enity name
+     * $_enity - enity name
      * 
      * @var string
      */
-    protected $_entity = '';
+    protected $_enity = '';
 
     /**
      * $_field - field name
@@ -63,7 +66,7 @@ abstract class Extlib_Validate_Doctrine2_Abstract extends Zend_Validate_Abstract
      * 'enity'   => The database enity to validate against
      * 'field'   => The field to check for a match
      * 'exclude' => An optional where clause or field/value pair to exclude from the query
-     * 'em' => An optional instance of EnityManager to use
+     * 'em' => An optional database EnityManager to use
      *
      * @param array|Zend_Config $options Options to use for this validator
      */
@@ -73,7 +76,7 @@ abstract class Extlib_Validate_Doctrine2_Abstract extends Zend_Validate_Abstract
             $options = $options->toArray();
         } else if (func_num_args() > 1) {
             $options       = func_get_args();
-            $temp['entity'] = array_shift($options);
+            $temp['enity'] = array_shift($options);
             $temp['field'] = array_shift($options);
             if (!empty($options)) {
                 $temp['exclude'] = array_shift($options);
@@ -91,14 +94,14 @@ abstract class Extlib_Validate_Doctrine2_Abstract extends Zend_Validate_Abstract
         } elseif (Zend_Registry::isRegistered('em')) {
             $this->_em = Zend_Registry::get('em');
         } else {
-            throw new Exception("Entity Manager dosen't found!");
+            throw new Exception("Enity Manager dosen't found!");
         }
         
-        if (!array_key_exists('entity', $options)) {
+        if (!array_key_exists('enity', $options)) {
             require_once 'Zend/Validate/Exception.php';
-            throw new Zend_Validate_Exception('Entity option missing!');
+            throw new Zend_Validate_Exception('Enity option missing!');
         } else {
-            $this->setenity($options['entity']);    
+            $this->setenity($options['enity']);    
         }
 
         if (!array_key_exists('field', $options)) {
@@ -164,7 +167,7 @@ abstract class Extlib_Validate_Doctrine2_Abstract extends Zend_Validate_Abstract
      */
     public function getEnity()
     {
-        return $this->_entity;
+        return $this->_enity;
     }
 
     /**
@@ -175,7 +178,7 @@ abstract class Extlib_Validate_Doctrine2_Abstract extends Zend_Validate_Abstract
      */
     public function setEnity($enity)
     {
-        $this->_entity = (string) $enity;
+        $this->_enity = (string) $enity;
         return $this;
     }
 
@@ -189,7 +192,7 @@ abstract class Extlib_Validate_Doctrine2_Abstract extends Zend_Validate_Abstract
     {
         $query = $this->_em->createQueryBuilder();
         $query->add('select', "enity.$this->_field")
-              ->add('from', "$this->_entity enity")
+              ->add('from', "$this->_enity enity")
               ->add('where', "enity.$this->_field = :identifier")
               ->setParameter('identifier', $value);
                 
