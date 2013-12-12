@@ -3,12 +3,12 @@
 namespace ExtlibTest\Validate;
 
 /**
- * Tests for Extlib\Validate\Pesel
+ * Tests for Extlib\Validate\Url
  * 
  * @author      Lukasz Ciolecki <ciolecki.lukasz@gmail.com>
  * @copyright   Copyright (c) 2011 Lukasz Ciolecki (mart)
  */
-class PeselTest extends \PHPUnit_Framework_TestCase
+class UrlTest extends \PHPUnit_Framework_TestCase
 {
 
     /**
@@ -16,28 +16,28 @@ class PeselTest extends \PHPUnit_Framework_TestCase
      * 
      * @return array
      */
-    public function pesels()
+    public function urls()
     {
         return array(
             [null, false],
             ["", false],
-            ["46042919991", false],
-            ["46042919999", true],
-            [46042919999, true],
-            [46042919991, false]
+            ["http://onet.pl/ad/asd?123", true],
+            ["https://onet.pl/asdasd/asda", true],
+            ["onet.pl", false],
+            ["asdad", false]
         );
     }
 
     /**
      * Testing method
      * 
-     * @dataProvider pesels
+     * @dataProvider urls
      * @test
      */
-    public function assert($pesel, $expected)
+    public function tests($url, $expected)
     {
-        $validator = new \Extlib\Validate\Pesel();
-        $result = $validator->isValid($pesel);
+        $validator = new \Extlib\Validate\Url();
+        $result = $validator->isValid($url);
         $this->assertEquals($expected, $result);
     }
 }
