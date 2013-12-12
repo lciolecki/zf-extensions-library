@@ -33,7 +33,7 @@ class IpAddressTest extends \PHPUnit_Framework_TestCase
      * @dataProvider addresses
      * @test
      */
-    public function assert($address, $expected)
+    public function tests($address, $expected)
     {
         $validator = new \Extlib\Validate\IpAddress();
         $result = $validator->isValid($address);

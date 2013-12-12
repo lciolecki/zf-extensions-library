@@ -38,7 +38,7 @@ class PasswordStrengthTest extends \PHPUnit_Framework_TestCase
      * @dataProvider passwords
      * @test
      */
-    public function assert($password, $expected)
+    public function tests($password, $expected)
     {
         $validator = new \Extlib\Validate\PasswordStrength();
         $result = $validator->isValid($password);

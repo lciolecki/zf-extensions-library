@@ -16,7 +16,7 @@ class SmallerThenTest extends \PHPUnit_Framework_TestCase
      * 
      * @return array
      */
-    public function datas()
+    public function data()
     {
         return array(
             [null, true],
@@ -32,7 +32,7 @@ class SmallerThenTest extends \PHPUnit_Framework_TestCase
     /**
      * Testing method
      * 
-     * @dataProvider datas
+     * @dataProvider data
      * @test
      */
     public function tests($data, $expected)

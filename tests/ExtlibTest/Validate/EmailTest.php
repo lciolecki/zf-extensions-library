@@ -34,7 +34,7 @@ class EmailTest extends \PHPUnit_Framework_TestCase
      * @dataProvider emails
      * @test
      */
-    public function assert($email, $expected)
+    public function tests($email, $expected)
     {
         $validator = new \Extlib\Validate\Email();
         $result = $validator->isValid($email);

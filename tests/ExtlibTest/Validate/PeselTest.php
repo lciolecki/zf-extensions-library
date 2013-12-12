@@ -34,7 +34,7 @@ class PeselTest extends \PHPUnit_Framework_TestCase
      * @dataProvider pesels
      * @test
      */
-    public function assert($pesel, $expected)
+    public function tests($pesel, $expected)
     {
         $validator = new \Extlib\Validate\Pesel();
         $result = $validator->isValid($pesel);
