@@ -8,7 +8,7 @@ namespace Extlib\Validate;
  * @category    Extlib
  * @package     Extlib\Validate
  * @author      Lukasz Ciolecki <ciolecki.lukasz@gmail.com>
- * @copyright   Copyright (c) 2011 Lukasz Ciolecki (mart)
+ * @copyright   Copyright (c) 2013 Lukasz Ciolecki (mart)
  */
 class IpAddress extends FilterVar
 {
