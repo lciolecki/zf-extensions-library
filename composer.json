@@ -21,7 +21,7 @@
     ],
     "require-dev": {
         "lciolecki/php-library": "master-dev",
-        "zendframework/zendframework1": "1.12.*"
+        "zendframework/zendframework1": "1.*"
     },
     "autoload": {
         "psr-0": {
