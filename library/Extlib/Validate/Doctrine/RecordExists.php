@@ -1,35 +1,30 @@
 <?php
-/**
- * @see Extlib_Validate_Db_Abstract
- */
-require_once 'Extlib/Validate/Doctrine/Abstract.php';
+
+namespace Extlib\Validate\Doctrine;
 
 /**
- * Extlib_Validate_Doctrine_RecordExists - Confirms a record exists in a table.
+ * Doctrine v1.2 record exists validate class
  *
- * @category   Extlib
- * @package    Extlib_Validate
- * @uses       Extlib_Validate_Doctrine_Abstract
- * @copyright  Copyright (c) 2012 Łukasz Ciołecki (Mart)
+ * @category    Extlib
+ * @package     Extlib\Validate
+ * @subpackage  Extlib\Validate\Doctrine
+ * @author      Lukasz Ciolecki <ciolecki.lukasz@gmail.com>
+ * @copyright   Copyright (c) 2012 Łukasz Ciołecki (Mart)
  */
-class Extlib_Validate_Doctrine_RecordExists extends Extlib_Validate_Doctrine_Abstract
+class RecordExists extends DoctrineAbstract
 {
+
     /**
      * (non-PHPdoc)
      * @see Zend_Validate_Interface::isValid()
      */
     public function isValid($value)
     {
-        $valid = true;
-        $this->_setValue($value);
-
-        $result = $this->_query($value);
-        
-        if (!$result) {
-            $valid = false;
-            $this->_error(self::ERROR_NO_RECORD_FOUND);
+        if (!$this->query($value)) {
+            $this->_error(self::ERROR_NO_RECORD_FOUND, $value);
+            return false;
         }
 
-        return $valid;
+        return true;
     }
 }

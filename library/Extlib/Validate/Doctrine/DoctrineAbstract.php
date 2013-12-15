@@ -1,208 +1,267 @@
 <?php
+
+namespace Extlib\Validate\Doctrine;
+
 /**
- * Extlib_Validate_Doctrine_Abstract - Class for Doctrine record validation
+ * Doctrine v1.2 abstract class validate
  *
- * @category   Extlib
- * @package    Extlib_Validate
- * @uses       Extlib_Validate_Abstract
- * @copyright  Copyright (c) 2012 Łukasz Ciołecki (Mart)
+ * @category    Extlib
+ * @package     Extlib\Validate
+ * @subpackage  Extlib\Validate\Doctrine
+ * @author      Lukasz Ciolecki <ciolecki.lukasz@gmail.com>
+ * @copyright   Copyright (c) 2012 Łukasz Ciołecki (mart)
  */
-abstract class Extlib_Validate_Doctrine_Abstract extends Zend_Validate_Abstract
+abstract class DoctrineAbstract extends \Zend_Validate_Abstract
 {
     /**
-     * Error constants
+     * Error message keys
      */
     const ERROR_NO_RECORD_FOUND = 'noDoctrineRecordFound';
-    const ERROR_RECORD_FOUND    = 'doctrineRecordFound';
+    const ERROR_RECORD_FOUND = 'doctrineRecordFound';
 
     /**
-     * $_messageTemplates - message templates
+     * Array of error messages
      * 
-     * @var array
+     * @var array Message templates
      */
     protected $_messageTemplates = array(
         self::ERROR_NO_RECORD_FOUND => "No record matching '%value%' was found",
-        self::ERROR_RECORD_FOUND    => "A record matching '%value%' was found",
+        self::ERROR_RECORD_FOUND => "A record matching '%value%' was found",
     );
 
     /**
-     * $_table - table name
+     * Instance of connection
+     * 
+     * @var \Doctrine_Connection
+     */
+    protected $connection = null;
+
+    /**
+     * Table model class name
      * 
      * @var string
      */
-    protected $_table = '';
+    protected $table = '';
 
     /**
-     * $_field - field name
+     * Field name
      * 
      * @var string
      */
-    protected $_field = '';
+    protected $field = '';
 
     /**
-     * $_exclude - exlude fields
+     * Eexlude fields
      * 
-     * @var mixed
+     * field => value
+     * 
+     * @var array
      */
-    protected $_exclude = array();
+    protected $exclude = array();
 
     /**
-     * Provides basic configuration for use with Zend_Validate_Doctrine Validators
-     * Setting $exclude allows a single record to be excluded from matching.
-     * Exclude can either be a String containing a where clause, or an array with `field` and `value` keys
-     * to define the where clause added to the sql.
-     *
-     * The following option keys are supported:
-     * 'table'   => The database table to validate against
-     * 'field'   => The field to check for a match
-     * 'exclude' => An optional where clause or field/value pair to exclude from the query
-     * 'adapter' => An optional database adapter to use
-     *
-     * @param array|Zend_Config $options Options to use for this validator
+     * Include fields
+     * 
+     * field => value
+     * 
+     * @var array
+     */
+    protected $include = array();
+
+    /**
+     * Instance of construct
+     * 
+     * @param mixed $options
+     * @throws \Zend_Validate_Exception
      */
     public function __construct($options)
     {
-        if ($options instanceof Zend_Config) {
+        if ($options instanceof \Zend_Config) {
             $options = $options->toArray();
-        } else if (func_num_args() > 1) {
-            $options       = func_get_args();
-            $temp['table'] = array_shift($options);
-            $temp['field'] = array_shift($options);
-            if (!empty($options)) {
-                $temp['exclude'] = array_shift($options);
-            }
-
-            if (!empty($options)) {
-                $temp['adapter'] = array_shift($options);
-            }
-
-            $options = $temp;
-        }         
-        
-        if (!array_key_exists('table', $options)) {
-            require_once 'Zend/Validate/Exception.php';
-            throw new Zend_Validate_Exception('Table option missing!');
-        } else {
-            $this->setTable($options['table']);    
+        } elseif (!is_array($options)) {
+            throw new \Zend_Validate_Exception('$config must be an instance of Zend_Config or array.');
         }
 
-        if (!array_key_exists('field', $options)) {
-            require_once 'Zend/Validate/Exception.php';
-            throw new Zend_Validate_Exception('Field option missing!');
-        } else {
-            $this->setField($options['field']);    
+        if (isset($options['connection'])) {
+            $this->setConnection($options['connection']);
         }
 
-        if (array_key_exists('exclude', $options)) {
+        if (isset($options['table'])) {
+            $this->setTable($options['table']);
+        }
+
+        if (isset($options['field'])) {
+            $this->setField($options['field']);
+        }
+
+        if (isset($options['exclude'])) {
             $this->setExclude($options['exclude']);
         }
+
+        if (isset($options['include'])) {
+            $this->setInclude($options['include']);
+        }
     }
 
     /**
-     * Returns the set exclude clause
-     *
-     * @return array
+     * Get doctrine connection
+     * 
+     * @return \Doctrine_Connection
      */
-    public function getExclude()
+    public function getConnection()
     {
-        return $this->_exclude;
+        if (null === $this->connection) {
+            $this->setConnection(\Doctrine_Manager::getInstance()->getCurrentConnection());
+        }
+
+        return $this->connection;
     }
 
     /**
-     * Sets a new exclude clause
-     *
-     * @param array $exclude
-     * @return Extlib_Validate_Doctrine_Abstract
+     * Set doctrine connection
+     * 
+     * @param \Doctrine_Connection $connection
+     * @return \Extlib\Validate\Doctrine\DoctrineAbstract
      */
-    public function setExclude(array $exclude)
+    public function setConnection(\Doctrine_Connection $connection)
     {
-        $this->_exclude = $exclude;
+        $this->connection = $connection;
         return $this;
     }
 
     /**
-     * Returns the set field
-     *
-     * @return string|array
-     */
-    public function getField()
-    {
-        return $this->_field;
-    }
-
-    /**
-     * Sets a new field
-     *
-     * @param string $field
-     * @return Extlib_Validate_Doctrine_Abstract
-     */
-    public function setField($field)
-    {
-        $this->_field = (string) $field;
-        return $this;
-    }
-
-    /**
-     * Returns the set table
-     *
+     * Get table model name
+     * 
      * @return string
      */
     public function getTable()
     {
-        return $this->_table;
+        return $this->table;
     }
 
     /**
-     * Sets a new table
-     *
+     * Set table model name
+     * 
      * @param string $table
-     * @return Extlib_Validate_Doctrine_Abstract
+     * @return \Extlib\Validate\Doctrine\DoctrineAbstract
      */
     public function setTable($table)
     {
-        $this->_table = (string) $table;
+        $this->table = $table;
+        return $this;
+    }
+
+    /**
+     * Get checking field
+     * 
+     * @return string
+     */
+    public function getField()
+    {
+        return $this->field;
+    }
+
+    /**
+     * Set checking field
+     * 
+     * @param string $field
+     * @return \Extlib\Validate\Doctrine\DoctrineAbstract
+     */
+    public function setField($field)
+    {
+        $this->field = $field;
+        return $this;
+    }
+
+    /**
+     * Get exclude fields
+     * 
+     * @return array
+     */
+    public function getExclude()
+    {
+        return $this->exclude;
+    }
+
+    /**
+     * Set exclude fields
+     * 
+     * @param array $exclude
+     * @return \Extlib\Validate\Doctrine\DoctrineAbstract
+     */
+    public function setExclude(array $exclude = array())
+    {
+        $this->exclude = $exclude;
+        return $this;
+    }
+
+    /**
+     * Add exclude fields
+     * 
+     * @param array $exclude
+     * @return \Extlib\Validate\Doctrine\DoctrineAbstract
+     */
+    public function addExclude(array $exclude)
+    {
+        $this->exclude = array_merge($this->exclude, $exclude);
+        return $this;
+    }
+
+    /**
+     * Get include fields
+     * 
+     * @return array
+     */
+    public function getInclude()
+    {
+        return $this->include;
+    }
+
+    /**
+     * Set include fields
+     * 
+     * @param array $include
+     * @return \Extlib\Validate\Doctrine\DoctrineAbstract
+     */
+    public function setInclude(array $include = array())
+    {
+        $this->include = $include;
+        return $this;
+    }
+
+    /**
+     * Add include fields
+     * 
+     * @param array $include
+     * @return \Extlib\Validate\Doctrine\DoctrineAbstract
+     */
+    public function addInclude(array $include)
+    {
+        $this->include = array_merge($this->include, $include);
         return $this;
     }
 
     /**
      * Run query and returns matches, or null if no matches are found.
      *
-     * @param  String $value
-     * @return Array when matches are found.
+     * @param  string $value
+     * @return array
      */
-    protected function _query($value)
+    protected function query($value)
     {
+        $query = \Doctrine_Query::create($this->getConnection())
+                ->select($this->getField())
+                ->from($this->getTable())
+                ->where(sprintf('%s = ?', $this->getField()), $value);
 
-        $query = Doctrine_Query::create()
-                               ->select($this->getField())
-                               ->from($this->getTable())
-                               ->where($this->getField() . '=?', $value);
-        
-        $query = $this->_addExcludeQuery($query);
-        $result = $query->fetchOne(array(), Doctrine_Core::HYDRATE_ARRAY);
-        return $result;
-    }
-    
-    /**
-     * Add exclude subquery
-     * 
-     * @param Doctrine_Query $query
-     * @return \Doctrine_Query
-     */
-    protected function _addExcludeQuery(Doctrine_Query $query)
-    {
-        $exclude = $this->getExclude();                       
-                
-        if (isset($exclude['value']) && null !== $exclude['value'] && isset($exclude['field'])) {
-            $query->andWhere($exclude['field'] . ' != ?', $exclude['value']);         
-        } else {
-            foreach($exclude as $condition) {
-                if (is_array($condition) && isset($condition['value']) && null !== $condition['value'] && isset($condition['field'])) {
-                    $query->andWhere($condition['field'] . ' != ?', $condition['value']);       
-                }  
-            }
+        foreach ($this->getExclude() as $exclude => $value) {
+            $query->andWhere(sprintf('%s != ?', $exclude), $value);
         }
-        
-        return $query;
+
+        foreach ($this->getInclude() as $include => $value) {
+            $query->andWhere(sprintf('%s = ?', $include), $value);
+        }
+
+        return $query->fetchOne(array(), Doctrine_Core::HYDRATE_ARRAY);
     }
 }
