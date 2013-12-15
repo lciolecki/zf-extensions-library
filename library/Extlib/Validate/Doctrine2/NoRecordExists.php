@@ -3,7 +3,7 @@
 namespace Extlib\Validate\Doctrine2;
 
 /**
- * Doctrine2 no record exists validate class
+ * Doctrine v2 no record exists validate class
  *
  * @category    Extlib
  * @package     Extlib\Validate

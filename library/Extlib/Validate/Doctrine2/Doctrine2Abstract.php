@@ -3,7 +3,7 @@
 namespace Extlib\Validate\Doctrine2;
 
 /**
- * Doctrine2 abstract class validate
+ * Doctrine v2 abstract class validate
  *
  * @category    Extlib
  * @package     Extlib\Validate
@@ -49,11 +49,22 @@ abstract class Doctrine2Abstract extends \Zend_Validate_Abstract
     protected $field = '';
 
     /**
-     * Eexlude field / fields
+     * Eexlude fields
+     * 
+     * field => value
      * 
      * @var array
      */
     protected $exclude = array();
+
+    /**
+     * Include fields
+     * 
+     * field => value
+     * 
+     * @var array
+     */
+    protected $include = array();
 
     /**
      * Instance of EnityManager
@@ -62,6 +73,12 @@ abstract class Doctrine2Abstract extends \Zend_Validate_Abstract
      */
     protected $entityManager = null;
 
+    /**
+     * Instance of construct
+     * 
+     * @param mixed $options
+     * @throws \Zend_Validate_Exception
+     */
     public function __construct($options)
     {
         if ($options instanceof \Zend_Config) {
@@ -110,7 +127,7 @@ abstract class Doctrine2Abstract extends \Zend_Validate_Abstract
     }
 
     /**
-     * Get exclue terms
+     * Get exclue fields
      * 
      * @return array
      */
@@ -142,7 +159,7 @@ abstract class Doctrine2Abstract extends \Zend_Validate_Abstract
     }
 
     /**
-     * Set check filed name
+     * Set checking filed name
      * 
      * @param string $field
      * @return \Extlib\Validate\Doctrine2\Doctrine2Abstract
@@ -154,7 +171,7 @@ abstract class Doctrine2Abstract extends \Zend_Validate_Abstract
     }
 
     /**
-     * Set exclude terms
+     * Set exclude fields
      * 
      * @param array $exclude
      * @return \Extlib\Validate\Doctrine2\Doctrine2Abstract
@@ -162,6 +179,52 @@ abstract class Doctrine2Abstract extends \Zend_Validate_Abstract
     public function setExclude(array $exclude)
     {
         $this->exclude = $exclude;
+        return $this;
+    }
+ 
+    /**
+     * Add exclude fields
+     * 
+     * @param array $exclude
+     * @return \Extlib\Validate\Doctrine2\Doctrine2Abstract
+     */
+    public function addExclude(array $exclude)
+    {
+        $this->exclude = array_merge($this->exclude, $exclude);
+        return $this;
+    }
+    
+    /**
+     * Get include fields
+     * 
+     * @return array
+     */
+    public function getInclude()
+    {
+        return $this->include;
+    }       
+
+    /**
+     * Set include fields
+     *   
+     * @param array $include
+     * @return \Extlib\Validate\Doctrine2\Doctrine2Abstract
+     */
+    public function setInclude(array $include)
+    {
+        $this->include = $include;
+        return $this;
+    }
+
+    /**
+     * Add include fields
+     * 
+     * @param array $include
+     * @return \Extlib\Validate\Doctrine2\Doctrine2Abstract
+     */
+    public function addInclude(array $include)
+    {
+        $this->include = array_merge($this->include, $include);
         return $this;
     }
 
@@ -191,12 +254,14 @@ abstract class Doctrine2Abstract extends \Zend_Validate_Abstract
                 ->where(sprintf('entity.%s = :field', $this->getField()))
                 ->setParameter(':field', $value);
 
-        foreach ($this->getExclude() as $exclude) {
-            list($field, $value) = $exclude;
-            if ($field && $value) {
-                $query->andWhere(sprintf('entity.%s != :%s', $field, md5($field)))
-                        ->setParameter(md5($field), $value);
-            }
+        foreach ($this->getExclude() as $exclude => $value) {
+            $query->andWhere(sprintf('entity.%s != :%s', $exclude, $exclude))
+                    ->setParameter($exclude, $value);
+        }
+
+        foreach ($this->getInclude() as $include => $value) {
+            $query->andWhere(sprintf('entity.%s = :%s', $include, $include))
+                    ->setParameter($include, $value);
         }
 
         return $query->getQuery()->execute();

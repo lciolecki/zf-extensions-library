@@ -3,7 +3,7 @@
 namespace Extlib\Validate\Doctrine2;
 
 /**
- * Doctrine2 no record exists validate class
+ * Doctrine v2 record exists validate class
  *
  * @category    Extlib
  * @package     Extlib\Validate
@@ -21,7 +21,7 @@ class RecordExists extends Doctrine2Abstract
     public function isValid($value)
     {
         if (!$this->query($value)) {
-            $this->_error(self::ERROR_NO_RECORD_FOUND);
+            $this->_error(self::ERROR_NO_RECORD_FOUND, $value);
             return false;
         }
 
