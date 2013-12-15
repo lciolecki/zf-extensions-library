@@ -1,9 +1,12 @@
 <?php
 
+namespace Extlib\View\Helper;
+
+
 /**
  * 
  */
-class Extlib_View_Helper_Media extends Zend_View_Helper_Abstract
+class Media extends \Zend_View_Helper_Abstract
 {
     /* Add param name */
     const QUERY_PARAM_NAME = 'ts';
@@ -13,14 +16,14 @@ class Extlib_View_Helper_Media extends Zend_View_Helper_Abstract
      * 
      * @var string
      */
-    static protected $dir = null;
+    static public $dir = null;
     
     /**
      * Media domain name
      * 
      * @var string
      */
-    static protected $domain = null;
+    static public $domain = null;
 
     /**
      * Instance of construct
@@ -32,7 +35,8 @@ class Extlib_View_Helper_Media extends Zend_View_Helper_Abstract
         }
     
         if (null === self::$domain) {
-            self::$domain = \Extlib\System::getInstance()->getDomain();
+            $domain = new \Extlib\System\Domain();
+            self::$domain = $domain->getAddress();
         }
     }
     
@@ -55,25 +59,5 @@ class Extlib_View_Helper_Media extends Zend_View_Helper_Abstract
         }
 
         return trim(self::$domain, '/') .  '/' . trim($file, '/');
-    }
-    
-    /**
-     * Set domain directory
-     * 
-     * @param string $dir
-     */
-    static public function setSetDir($dir)
-    {
-        self::$dir = $dir;
-    }
- 
-    /**
-     * Set domain name
-     * 
-     * @param string $domain
-     */
-    static public function setDomain($domain)
-    {
-        self::$domain = $domain;
     }
 }

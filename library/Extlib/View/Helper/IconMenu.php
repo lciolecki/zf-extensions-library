@@ -1,25 +1,31 @@
 <?php
+
+namespace Extlib\View\Helper;
+
 /**
- * Extlib_View_Helper_IconMenu - View helper class menu with icons
+ * View helper class menu with icons
  * 
- * @category   Extlib
- * @package    Extlib_View
- * @subpackage Helper
- * @author Łukasz Ciołecki (Mart) 
+ * @category    Extlib
+ * @package     Extlib\View
+ * @subpackage  Extlib\View\Helper
+ * @author      Lukasz Ciolecki <ciolecki.lukasz@gmail.com>
+ * @copyright   Copyright (c) 2010 Lukasz Ciolecki (mart)
  */
-class Extlib_View_Helper_IconMenu extends Zend_View_Helper_Navigation_Menu
+class IconMenu extends \Zend_View_Helper_Navigation_Menu
 {
-    /* Const settings */
+    /**
+     * Const settings
+     */
     const ICON_CLASS = 'menu-icon';
     const LABEL_CLASS = 'menu-label';
-    
+
     /**
      * View helper execute method
      * 
-     * @param Zend_Navigation_Container $container
+     * @param \Zend_Navigation_Container $container
      * @return \Zend_View_Helper_IconMenu
      */
-    public function iconMenu(Zend_Navigation_Container $container = null)
+    public function iconMenu(\Zend_Navigation_Container $container = null)
     {
         if (null !== $container) {
             $this->setContainer($container);
@@ -34,10 +40,10 @@ class Extlib_View_Helper_IconMenu extends Zend_View_Helper_Navigation_Menu
      *
      * Overrides {@link Zend_View_Helper_Navigation_Menu::htmlify()}.
      * 
-     * @param Zend_Navigation_Page $page
+     * @param \Zend_Navigation_Page $page
      * @return string
      */
-    public function htmlify(Zend_Navigation_Page $page)
+    public function htmlify(\Zend_Navigation_Page $page)
     {
         // get label and title for translating
         $label = $page->getLabel();
@@ -55,9 +61,9 @@ class Extlib_View_Helper_IconMenu extends Zend_View_Helper_Navigation_Menu
 
         // get attribs for element
         $attribs = array(
-            'id'     => $page->getId(),
-            'title'  => $title,
-            'class'  => $page->getClass()
+            'id' => $page->getId(),
+            'title' => $title,
+            'class' => $page->getClass()
         );
 
         // does page have a href?
@@ -71,16 +77,15 @@ class Extlib_View_Helper_IconMenu extends Zend_View_Helper_Navigation_Menu
         }
 
         // does page have icon
-        if (null !== $page->icon)
-        {
+        if (null !== $page->icon) {
             $icon = '<img src="' . $page->icon . '" class="' . self::ICON_CLASS . '" alt="" /> ';
         } else {
             $icon = '';
         }
 
         return '<' . $element . $this->_htmlAttribs($attribs) . '>'
-             . $icon
-             . '<span class="' . self::LABEL_CLASS . '">' . $this->view->escape($label) . '</span>'
-             . '</' . $element . '>';
+                . $icon
+                . '<span class="' . self::LABEL_CLASS . '">' . $this->view->escape($label) . '</span>'
+                . '</' . $element . '>';
     }
 }

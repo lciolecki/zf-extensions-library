@@ -1,41 +1,53 @@
 <?php
+
+namespace Extlib\View\Helper;
+
 /**
- * Extlib_View_Helper_FormTinyMCE - tinyMce view helper class
+ * TinyMce view helper class
  * 
- * @category   Extlib
- * @package    Extlib_View
- * @subpackage Helper
- * @author Łukasz Ciołecki (Mart)
+ * @category    Extlib
+ * @package     Extlib\View
+ * @subpackage  Extlib\View\Helper
+ * @author      Lukasz Ciolecki <ciolecki.lukasz@gmail.com>
+ * @copyright   Copyright (c) 2010 Lukasz Ciolecki (mart)
  */
-class Extlib_View_Helper_FormTinymce extends Zend_View_Helper_FormTextarea 
+class FormTinymce extends \Zend_View_Helper_FormTextarea
 {
     const FOCUS_CLASS = 'focus';
-    
+
     /**
-     * $_tinyMcePath - path to tinyMce java script library
+     * Path to TinyMce java script library
      * 
      * @var string 
      */
-    static public $_tinyMcePath = '/js/tiny_mce/tiny_mce.js';
-    	
+    static public $tinyMcePath = '/js/tiny_mce/tiny_mce.js';
+
     /**
-     * $_locale - instance of Zend_Locale
+     * Instance of Zend_Locale
      * 
-     * @var Zend_Locale 
+     * @var \Zend_Locale 
      */
-    protected $_locale = null;
-    
+    protected $locale = null;
+
     /**
-     * __construct() - instance of construct
+     * Instance of construct
      */
     public function __construct()
     {
-        $this->_locale = new Zend_Locale();
+        $this->locale = new \Zend_Locale();
     }
 
+    /**
+     * Execute method
+     * 
+     * @param string $name
+     * @param string $value
+     * @param array $attribs
+     * @return string
+     */
     public function formTinymce($name, $value = null, $attribs = null)
     {
-        $this->view->headScript()->prependFile(self::$_tinyMcePath);
+        $this->view->headScript()->prependFile(self::$tinyMcePath);
 
         $xhtml = '
             <script type="text/javascript">
@@ -44,13 +56,13 @@ class Extlib_View_Helper_FormTinymce extends Zend_View_Helper_FormTextarea
                     // General options
                     mode : "exact",
                     theme : "advanced",
-                    language: "'. $this->_locale->getLanguage() .'", 
-                    culture:"'. $this->_locale->getLanguage() .'",
-                    elements: "'. $name .'",
+                    language: "' . $this->locale->getLanguage() . '", 
+                    culture:"' . $this->locale->getLanguage() . '",
+                    elements: "' . $name . '",
 
                     setup: function(ed) {
                         ed.onClick.add(function(ed, evt) {
-                            $("span#'. $name .'_parent").addClass("'. self::FOCUS_CLASS .'");
+                            $("span#' . $name . '_parent").addClass("' . self::FOCUS_CLASS . '");
                         });
                     },
 
@@ -59,18 +71,18 @@ class Extlib_View_Helper_FormTinymce extends Zend_View_Helper_FormTextarea
                         var inEditor = false;;
 
                         $("tr.mceFirst").click(function() {
-                            $("span#'. $name .'_parent").addClass("'. self::FOCUS_CLASS .'");
+                            $("span#' . $name . '_parent").addClass("' . self::FOCUS_CLASS . '");
                             inEditor = true;
                         });
 
                         $("tr.mceLast").click(function() {
-                            $("span#'. $name .'_parent").addClass("'. self::FOCUS_CLASS .'");
+                            $("span#' . $name . '_parent").addClass("' . self::FOCUS_CLASS . '");
                             inEditor = true;
                         });
 
                         $("body").click(function() {
                             if (!inEditor) {
-                                $("span#'. $name .'_parent").removeClass("'. self::FOCUS_CLASS .'");
+                                $("span#' . $name . '_parent").removeClass("' . self::FOCUS_CLASS . '");
                             } else {
                                 inEditor = false;
                             }
@@ -98,8 +110,8 @@ class Extlib_View_Helper_FormTinymce extends Zend_View_Helper_FormTextarea
                 
                 function openKCFinder(field_name, url, type, win) {
                     tinyMCE.activeEditor.windowManager.open({
-                    file: "'. Extlib_View_Helper_Kcfinder::$_kcfinderPath . '?opener=tinymce&lang='. $this->_locale->getLanguage() . '&type=' . '" + type,
-                    title: "' . $this->view->translate('Zarządzanie plikami') .' " + type,
+                    file: "' . Kcfinder::$kcfinderPath . '?opener=tinymce&lang=' . $this->locale->getLanguage() . '&type=' . '" + type,
+                    title: "' . $this->view->translate('Zarządzanie plikami') . ' " + type,
                     width: 780,
                     height: 500,
                     resizable: "yes",
@@ -118,5 +130,5 @@ class Extlib_View_Helper_FormTinymce extends Zend_View_Helper_FormTextarea
         $xhtml .= $this->formTextarea($name, $value, $attribs);
 
         return $xhtml;
-    }							
+    }
 }

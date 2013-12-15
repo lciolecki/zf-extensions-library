@@ -1,63 +1,65 @@
 <?php
+
+namespace Extlib\View\Helper;
+
 /**
- * Extlib_View_Helper_Kcfinder - Kcfinder view helper class
+ * Kcfinder view helper class
  * 
- * @category   Extlib
- * @package    Extlib_View
- * @subpackage Helper
- * @author Łukasz Ciołecki (Mart)
+ * @category    Extlib
+ * @package     Extlib\View
+ * @subpackage  Extlib\View\Helper
+ * @author      Lukasz Ciolecki <ciolecki.lukasz@gmail.com>
+ * @copyright   Copyright (c) 2010 Lukasz Ciolecki (mart)
  */
-class Extlib_View_Helper_Kcfinder extends Zend_View_Helper_HtmlElement
+class Kcfinder extends \Zend_View_Helper_HtmlElement
 {
-    const CONTENER = 'div';
-    
     /**
-     * $_kcfinderPath - path to tinyMce java script library
+     * Path to TinyMce java script library
      * 
      * @var string 
      */
-    static public $_kcfinderPath = '/js/kcfinder/browse.php';
-    	
+    static public $kcfinderPath = '/js/kcfinder/browse.php';
+
     /**
-     * $_locale - instance of Zend_Locale
+     * Instance of Zend_Locale
      * 
-     * @var Zend_Locale 
+     * @var \Zend_Locale 
      */
-    protected $_locale = null;
-    
+    protected $locale = null;
+
     /**
-     * __construct() - instance of construct
+     * Instance of construct
      */
     public function __construct()
     {
-        $this->_locale = new Zend_Locale();
+        $this->locale = new \Zend_Locale();
     }
-    
+
     /**
-     * kcfinder() - exequte method
+     * Execute method
      * 
      * @param string $name
      * @param string $type
      * @param array $attribs
      * @param string $kcfinderPath
-     * @return mixed 
+     * @return string 
      */
     public function kcfinder($name, $type = 'file', array $attribs = array(), $kcfinderPath = null)
     {
         if (null !== $kcfinderPath) {
-            self::$_kcfinderPath = $kcfinderPath;
+            self::$kcfinderPath = $kcfinderPath;
         }
 
-        $src = self::$_kcfinderPath . '?type=' . $type . '&amp;lang=' . $this->_locale->getLanguage();
-        
-        if (array_key_exists('src', $attribs)) {
+        $src = self::$kcfinderPath . '?type=' . $type . '&amp;lang=' . $this->locale->getLanguage();
+
+        if (isset($attribs['src'])) {
             unset($attribs['src']);
         }
 
-        $xhtml = '<' . self::CONTENER . ' ' . $this->_htmlAttribs($attribs) . '>';
-        $xhtml .= '<iframe id="'. $this->view->escape($name) .'" src="'. $src .'"></iframe>';
-        $xhtml .= '</' . self::CONTENER . '>';
+        $xhtml  = '<div ' . $this->_htmlAttribs($attribs) . '>';
+        $xhtml .= '<iframe id="' . $this->view->escape($name) . '" src="' . $src . '"></iframe>';
+        $xhtml .= '</div>';
 
         return $xhtml;
-    }							
+    }
 }
