@@ -1,63 +1,66 @@
 <?php
+
+namespace Extlib\View\Helper;
+
 /**
- * Extlib_View_Helper_ShortText - View helper class for cut long text
+ * View helper class for cut long text
  * 
- * @category   Extlib
- * @package    Extlib_View
- * @subpackage Helper
- * @author Łukasz Ciołecki (Mart)
+ * @category    Extlib
+ * @package     Extlib\View
+ * @subpackage  Extlib\View\Helper
+ * @author      Lukasz Ciolecki <ciolecki.lukasz@gmail.com>
+ * @copyright   Copyright (c) 2010 Lukasz Ciolecki (mart)
  */
-class Extlib_View_Helper_ShortText extends Zend_View_Helper_Abstract 
+class ShortText extends \Zend_View_Helper_Abstract
 {
     /**
-     * $_charset - view encoding
+     * End of longest text
+     */
+    const END_TEXT = '...';
+    
+    /**
+     * View encoding
      * 
      * @var string
      */
-    protected $_charset = 'UTF-8';
-    
+    protected $charset = 'UTF-8';
+
     /**
-     * __construct() - instance of constructors
+     * Instance of constructors
      */
     public function __construct()
     {
-        $this->setView(Zend_Layout::getMvcInstance()->getView());
-        
         if ($this->view->getEncoding()) {
-            $this->_charset = $this->view->getEncoding();
+            $this->charset = $this->view->getEncoding();
         }
     }
-    
+
     /**
-     * shortText() - execute method
+     * Execute method
      *
      * @param string $text
-     * @param int $maxLength
+     * @param int $length
      * @param boolean $escape
      * @return string
      */
-    public function shortText($text, $maxLength, $escape = true)
+    public function shortText($text, $length, $escape = true)
     {
-        if (empty($text)) {
-            return null;
+        if (!$text) {
+            return '';
         }
-        
-        if ((int) $maxLength <= 0) {
-            throw new Zend_View_Exception('Max length text must be great then 0.');
-        }
-        
-        $text = $this->view->translate($text);
 
-        if (mb_strlen($text,  $this->_charset) > $maxLength) {
-            $text = mb_substr($text, 0, $maxLength, $this->_charset) . '...' ;  
-        } else {
-            $text = $text;
+        if ($length <= 0) {
+            throw new \Zend_View_Exception('Max length text must be great then 0.');
+        }
+
+        if ((bool) $escape) {
+            $text = $this->view->escape($text);
         }
         
-        if ((bool)$escape) {
-            return $this->view->escape($text);
-        }
-        
+        if (mb_strlen($text, $this->charset) > $length) {
+            return mb_substr($text, 0, $length, $this->charset) . self::END_TEXT;
+        } 
+
         return $text;
     }
 }
