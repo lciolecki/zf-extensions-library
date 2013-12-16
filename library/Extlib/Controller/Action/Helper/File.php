@@ -13,9 +13,23 @@ namespace Extlib\Controller\Action\Helper;
  */
 class File extends \Zend_Controller_Action_Helper_Abstract
 {
-    /* Default time cache */
-
-    const CACHE_EXPIRE = 2678400;
+    /**
+     * Default uses headers
+     */
+    const HEADER_MIME_TYPE  = 'Content-Type';
+    const HEADER_DOWNLOAD   = 'Content-Disposition';
+    const HEADER_SIZE       = 'Content-Length';
+    
+    /**
+     * Array of default headers
+     *
+     * @var array
+     */
+    protected $defaultHeaders = array (
+        self::HEADER_MIME_TYPE,
+        self::HEADER_DOWNLOAD,
+        self::HEADER_SIZE
+    );
     
     /**
      * Array of available options
@@ -24,8 +38,9 @@ class File extends \Zend_Controller_Action_Helper_Abstract
      */
     protected $options = array(
         'fileName' => null,
-        'download' => false,
+        'size' => null,
         'mimeType' => null,
+        'download' => false,
         'headers' => array(
             'Cache-Control' => 'max-age=2678400, public'
         )
@@ -57,34 +72,34 @@ class File extends \Zend_Controller_Action_Helper_Abstract
         }
 
         $this->disableViewAndLayout();
+        $this->options = array_merge_recursive($this->options, $params);
+        
+        if (null === $this->options['size']) {
+            $this->options['size'] = filesize($filePath);
+        }
+        
+        if (null === $this->options['fileName']) {
+            $this->options['fileName'] = pathinfo($filePath, PATHINFO_BASENAME);
+        }
+
+        if (null === $this->options['mimeType']) {
+            $this->options['mimeType'] = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $filePath);
+        }
+
         $response = $this->getResponse();
-
-        $respondFileSize = filesize($filePath);
-        $respondFileContent = file_get_contents($filePath);
-
-        $respondFileName = isset($params['fileName']) ? $params['fileName'] : null;
-        if (null === $respondFileName) {
-            $respondFileName = pathinfo($filePath, PATHINFO_BASENAME);
-        }
-
-        $respondMimeType = isset($params['mimeType']) ? $params['mimeType'] : null;
-        if (null === $respondMimeType) {
-            $respondMimeType = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $filePath);
-        }
-
-        $response->clearBody();
         $response->clearAllHeaders();
-        $response->setHeader('Content-Type', $respondMimeType);
-        $response->setHeader('Content-Length', $respondFileSize);
+        $response->clearBody();
 
-        if (isset($params['headers']) && is_array($params['headers'])) {
-            $this->buildHeaders($response, $params['headers']);
-        } else {
-            $response->setHeader('Cache-Control', sprintf('max-age=%s, public', self::CACHE_EXPIRE));
+        $response->setHeader(self::HEADER_MIME_TYPE, $this->options['mimeType']);
+        $response->setHeader(self::HEADER_SIZE, $this->options['size']);
+        
+        if ($this->options['download']) {
+            $response->setHeader(self::HEADER_DOWNLOAD, sprintf('attachment; filename="%s"', $this->options['fileName']));            
         }
 
-        $response->setHeader('Content-Disposition', sprintf('attachment; filename="%s"', $respondFileName));
-        $response->setBody($respondFileContent, $respondFileName);
+        $this->buildHeaders($response, $this->options['headers']);
+        
+        $response->setBody(file_get_contents($filePath), $this->options['fileName']);
         $response->sendResponse();
         exit;
     }
@@ -98,9 +113,9 @@ class File extends \Zend_Controller_Action_Helper_Abstract
      */
     protected function buildHeaders(Zend_Controller_Response_Abstract $response, array $headers)
     {
-        foreach ($headers as $header) {
-            if (is_array($header) && isset($header['name']) && isset($header['value'])) {
-                $response->setHeader($header['name'], $header['value'], isset($header['replace']) ? $header['replace'] : false);
+        foreach ($headers as $header => $value) {
+            if (!in_array($header, $this->defaultHeaders)) {
+                $response->setHeader($header, $value);
             }
         }
 
