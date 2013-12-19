@@ -16,11 +16,11 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://github.com/lciolecki/php-library.git"
+            "url": "https://github.com/lciolecki/php-library"
         }
     ],
     "require": {
-        "lciolecki/php-library": "master",
+        "lciolecki/php-library": "dev-master",
         "zendframework/zendframework1": "1.*"
     },
     "autoload": {
