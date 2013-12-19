@@ -25,9 +25,9 @@
     },
     "autoload": {
         "psr-0": {
- 
-            "Extlib\\": "library",
-            "ExtlibTest\\": "tests"
+            "Extlib_Log_Writer": "library/Extlib/Log/Writer/", 
+            "Extlib\\": "library/",
+            "ExtlibTest\\": "tests/"
         }
     }
 }
