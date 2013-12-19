@@ -2,13 +2,22 @@
 
 namespace Extlib\View\Helper;
 
+use Extlib\System;
 
 /**
+ * Media view helper, add query link for static elements.
  * 
+ * @category    Extlib
+ * @package     Extlib\View
+ * @subpackage  Extlib\View\Helper
+ * @author      Lukasz Ciolecki <ciolecki.lukasz@gmail.com>
+ * @copyright   Copyright (c) 2010 Lukasz Ciolecki (mart)
  */
 class Media extends \Zend_View_Helper_Abstract
 {
-    /* Add param name */
+    /**
+     * 
+     */ 
     const QUERY_PARAM_NAME = 'ts';
     
     /**
@@ -35,8 +44,7 @@ class Media extends \Zend_View_Helper_Abstract
         }
     
         if (null === self::$domain) {
-            $domain = new \Extlib\System\Domain();
-            self::$domain = $domain->getAddress();
+            self::$domain = System::getInstance()->getDomain()->getAddress();
         }
     }
     
