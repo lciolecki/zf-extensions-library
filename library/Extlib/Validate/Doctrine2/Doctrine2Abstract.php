@@ -89,8 +89,8 @@ abstract class Doctrine2Abstract extends \Zend_Validate_Abstract
 
         if (isset($options['em'])) {
             $this->setEntity($options['em']);
-        } elseif (Zend_Registry::isRegistered(self::REGISTY_NAMESPACE)) {
-            $this->setEntityManager(Zend_Registry::get(self::REGISTY_NAMESPACE));
+        } elseif (\Zend_Registry::isRegistered(self::REGISTY_NAMESPACE)) {
+            $this->setEntityManager(\Zend_Registry::get(self::REGISTY_NAMESPACE));
         }
 
         if (isset($options['entity'])) {
