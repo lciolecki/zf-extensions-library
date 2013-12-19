@@ -30,7 +30,7 @@ class ShortText extends \Zend_View_Helper_Abstract
      */
     public function __construct()
     {
-        if ($this->view->getEncoding()) {
+        if ($this->view && $this->view->getEncoding()) {
             $this->charset = $this->view->getEncoding();
         }
     }
@@ -53,7 +53,7 @@ class ShortText extends \Zend_View_Helper_Abstract
             throw new \Zend_View_Exception('Max length text must be great then 0.');
         }
 
-        if ((bool) $escape) {
+        if ($this->view && (bool) $escape) {
             $text = $this->view->escape($text);
         }
         

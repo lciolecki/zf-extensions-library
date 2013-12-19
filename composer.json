@@ -19,7 +19,7 @@
             "url": "http://github.com/lciolecki/php-library"
         }
     ],
-    "require-dev": {
+    "require": {
         "lciolecki/php-library": "master-dev",
         "zendframework/zendframework1": "1.*"
     },
