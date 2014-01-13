@@ -10,15 +10,8 @@
     ],
     "homepage": "",
     "license": "BSD-3-Clause",
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "git@github.com:cbschuld/Browser.php.git"
-        }
-    ],
     "require": {
         "php": ">=5.4",
-        "cbschuld/browser.php": "dev-master",
         "lciolecki/php-library": "dev-master",
         "zendframework/zendframework1": "1.*"
     },
