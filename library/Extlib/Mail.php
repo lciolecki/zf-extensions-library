@@ -24,7 +24,7 @@ class Mail extends \Zend_Mail
     {
         $this->setType(\Zend_Mime::MULTIPART_RELATED);
 
-        $dom = new DOMDocument(null, $this->getCharset());
+        $dom = new \DOMDocument(null, $this->getCharset());
         @$dom->loadHTML($html);
 
         $images = $dom->getElementsByTagName('img');
@@ -33,7 +33,7 @@ class Mail extends \Zend_Mail
             $url = $img->getAttribute('src');
 
             try {
-                $client = new Zend_Http_Client($url);
+                $client = new \Zend_Http_Client($url);
                 $response = $client->request();
 
                 if ($response->getStatus() === 200) {
