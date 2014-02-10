@@ -189,6 +189,17 @@ class Html implements MessageInterface
 
         return $this;
     }
+    
+    /**
+     * Alias for setData
+     * 
+     * @param array $data
+     * @return \Extlib\Mail\Message\Html 
+     */
+    public function addData(array $data)
+    {
+        return $this->setData($data);
+    }
 
     /**
      * Alias for setData

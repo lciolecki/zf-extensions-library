@@ -158,18 +158,18 @@ class Extlib_Log_Writer_DirStream extends \Zend_Log_Writer_Abstract
         if (!is_dir($streamDir)) {
             umask(0000);
             if (!mkdir($streamDir, 0777, true)) {
-                $msg = "Dir \"$baseDir\" cannot be created";
+                $msg = "Dir '$streamDir' cannot be created";
                 throw new \Zend_Log_Exception($msg);
             }
 
             $this->shutdown($priorityName);
         }
 
-        $currentFileName = $streamDir . DIRECTORY_SEPARATOR . $priorityName . '.log';
-        @chmod($currentFileName, 0777);
+        $filepath = $streamDir . DIRECTORY_SEPARATOR . $priorityName . '.log';
+        chmod($filepath, 0777);
 
-        if (!$this->streams[$priorityName] = @fopen($currentFileName, $this->mode, false)) {
-            $msg = "File \"$currentFileName\" cannot be opened with mode \"$this->mode\"";
+        if (!$this->streams[$priorityName] = @fopen($filepath, $this->mode, false)) {
+            $msg = "File '$filepath' cannot be opened with mode '$this->mode'";
             throw new \Zend_Log_Exception($msg);
         }
 
