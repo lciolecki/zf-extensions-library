@@ -166,8 +166,6 @@ class Extlib_Log_Writer_DirStream extends \Zend_Log_Writer_Abstract
         }
 
         $filepath = $streamDir . DIRECTORY_SEPARATOR . $priorityName . '.log';
-        chmod($filepath, 0777);
-
         if (!$this->streams[$priorityName] = @fopen($filepath, $this->mode, false)) {
             $msg = "File '$filepath' cannot be opened with mode '$this->mode'";
             throw new \Zend_Log_Exception($msg);

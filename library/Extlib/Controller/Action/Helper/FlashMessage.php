@@ -152,7 +152,7 @@ class FlashMessage extends \Zend_Controller_Action_Helper_Abstract
             throw new \Zend_Controller_Action_Exception('Incorrect type of message!');
         }
 
-        if (!Zend_Validate::is($len, 'Int')) {
+        if (!\Zend_Validate::is($len, 'Int')) {
             throw new \Zend_Controller_Action_Exception("Param 'len' must be a int value!");
         }
 
