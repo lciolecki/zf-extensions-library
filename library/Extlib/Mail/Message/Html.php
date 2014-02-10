@@ -191,6 +191,18 @@ class Html implements MessageInterface
     }
 
     /**
+     * Alias for setData
+     *  
+     * @param array $data 
+     * @return \Extlib\Mail\Message\Html 
+     */
+    public function addData(array $data)
+    {
+        return $this->setData($data); 
+    }
+
+
+    /**
      * Magic set property - alis for __set in Zend_View
      * 
      * @param string $name
