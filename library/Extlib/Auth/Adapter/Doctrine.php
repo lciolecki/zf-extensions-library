@@ -275,7 +275,7 @@ class Doctrine implements \Zend_Auth_Adapter_Interface
             return false;
         }
 
-        $returnObject = new stdClass();
+        $returnObject = new \stdClass();
 
         if (null !== $returnColumns) {
 
