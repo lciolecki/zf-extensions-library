@@ -1,7 +1,7 @@
 <?php
 
-namespace Extlib\Filter\Filter;
-use Extlib\Filter\Filter\PolishChar;
+namespace Extlib\Filter;
+use Extlib\Filter\PolishChar;
 
 /**
  * Simple class filter for slug

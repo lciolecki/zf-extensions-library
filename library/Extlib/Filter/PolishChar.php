@@ -1,6 +1,6 @@
 <?php
 
-namespace Extlib\Filter\Filter;
+namespace Extlib\Filter;
 
 /**
  * Filter class for remove polish char.
