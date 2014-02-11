@@ -6,9 +6,10 @@ use Extlib\Filter\Filter\PolishChar;
 /**
  * Simple class filter for slug
  *
- * @category   Extlib
- * @package    Extlib_Filter
- * @copyright  Copyright (c) 2011 Łukasz Ciołecki (Mart)
+ * @category    Extlib
+ * @package     Filter
+ * @author      Lukasz Ciolecki <ciolecki.lukasz@gmail.com>
+ * @copyright   Copyright (c) 2012 Lukasz Ciolecki (mart)
  */
 class Slug extends PolishChar
 {
