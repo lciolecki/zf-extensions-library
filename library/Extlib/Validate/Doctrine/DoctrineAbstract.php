@@ -262,6 +262,6 @@ abstract class DoctrineAbstract extends \Zend_Validate_Abstract
             $query->andWhere(sprintf('%s = ?', $include), $value);
         }
 
-        return $query->fetchOne(array(), Doctrine_Core::HYDRATE_ARRAY);
+        return $query->fetchOne(array(), \Doctrine_Core::HYDRATE_ARRAY);
     }
 }
