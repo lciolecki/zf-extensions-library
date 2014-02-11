@@ -61,7 +61,7 @@ class RecordExistsByFields extends \Extlib\Validate\Doctrine\DoctrineAbstract
      * Set sarch fields
      * 
      * @param array $searchFields
-     * @return \Simplepanel_Validate_Doctrine_RecordExistsByFields
+     * @return \Extlib\Validate\Doctrine\RecordExistsByFields
      */
     public function setSearchFields(array $searchFields)
     {
