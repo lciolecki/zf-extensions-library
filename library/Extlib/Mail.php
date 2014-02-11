@@ -45,11 +45,11 @@ class Mail extends \Zend_Mail
                     $cid = md5($pathinfo['filename']);
                     $html = str_replace($url, 'cid:' . $cid, $html);
 
-                    $mime = new Zend_Mime_Part($imageContent);
+                    $mime = new \Zend_Mime_Part($imageContent);
                     $mime->id = $cid;
                     $mime->type = $mimeType;
-                    $mime->disposition = Zend_Mime::DISPOSITION_INLINE;
-                    $mime->encoding = Zend_Mime::ENCODING_BASE64;
+                    $mime->disposition = \Zend_Mime::DISPOSITION_INLINE;
+                    $mime->encoding = \Zend_Mime::ENCODING_BASE64;
                     $mime->filename = $pathinfo['basename'];
 
                     $this->addAttachment($mime);
