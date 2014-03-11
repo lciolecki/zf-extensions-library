@@ -129,7 +129,7 @@ class File extends \Zend_Controller_Action_Helper_Abstract
      */
     protected function disableViewAndLayout()
     {
-        $layoout = Zend_Layout::getMvcInstance();
+        $layoout = \Zend_Layout::getMvcInstance();
         if (null !== $layoout) {
             $layoout->disableLayout();
         }
