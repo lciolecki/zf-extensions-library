@@ -12,7 +12,7 @@
     "license": "BSD-3-Clause",
     "require": {
         "php": ">=5.4",
-        "lciolecki/php-library": "master",
+        "lciolecki/php-library": "dev-master",
         "zendframework/zendframework1": "1.*"
     },
     "autoload": {
