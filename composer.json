@@ -8,8 +8,9 @@
         "extlib",
         "Zend Framework"
     ],
-    "homepage": "",
+    "homepage": "https://github.com/lciolecki/zf-extensions-library",
     "license": "BSD-3-Clause",
+    "minimum-stability": "dev",
     "require": {
         "php": ">=5.4",
         "lciolecki/php-library": "dev-master",
