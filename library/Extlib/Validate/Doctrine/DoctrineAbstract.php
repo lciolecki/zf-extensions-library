@@ -249,6 +249,17 @@ abstract class DoctrineAbstract extends \Zend_Validate_Abstract
      */
     protected function query($value)
     {
+        return $this->prepeareQuery($value)->fetchOne(array(), \Doctrine_Core::HYDRATE_ARRAY);
+    }
+    
+    /**
+     * Prepare validate query
+     * 
+     * @param mixed $value
+     * @return \Doctrine_Query
+     */
+    protected function prepeareQuery($value)
+    {
         $query = \Doctrine_Query::create($this->getConnection())
                 ->select($this->getField())
                 ->from($this->getTable())
@@ -262,6 +273,6 @@ abstract class DoctrineAbstract extends \Zend_Validate_Abstract
             $query->andWhere(sprintf('%s = ?', $include), $value);
         }
 
-        return $query->fetchOne(array(), Doctrine_Core::HYDRATE_ARRAY);
+        return $query;
     }
 }

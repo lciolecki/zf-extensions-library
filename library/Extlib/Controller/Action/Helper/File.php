@@ -63,12 +63,12 @@ class File extends \Zend_Controller_Action_Helper_Abstract
      * 
      * @param string $filePath
      * @param array $params
-     * @throws Zend_Controller_Action_Exception
+     * @throws \Zend_Controller_Action_Exception
      */
     public function file($filePath, array $params = array())
     {
         if (!file_exists($filePath)) {
-            throw new Zend_Controller_Action_Exception(null, 404);
+            throw new \Zend_Controller_Action_Exception(null, 404);
         }
 
         $this->disableViewAndLayout();
@@ -107,11 +107,11 @@ class File extends \Zend_Controller_Action_Helper_Abstract
     /**
      * Method build response headers
      * 
-     * @param Zend_Controller_Response_Abstract $response
+     * @param \Zend_Controller_Response_Abstract $response
      * @param array $headers
      * @return \Extlib\Controller\Action\Helper\File
      */
-    protected function buildHeaders(Zend_Controller_Response_Abstract $response, array $headers)
+    protected function buildHeaders(\Zend_Controller_Response_Abstract $response, array $headers)
     {
         foreach ($headers as $header => $value) {
             if (!in_array($header, $this->defaultHeaders)) {
@@ -129,12 +129,12 @@ class File extends \Zend_Controller_Action_Helper_Abstract
      */
     protected function disableViewAndLayout()
     {
-        $layoout = Zend_Layout::getMvcInstance();
+        $layoout = \Zend_Layout::getMvcInstance();
         if (null !== $layoout) {
             $layoout->disableLayout();
         }
 
-        $view = Zend_Controller_Action_HelperBroker::getStaticHelper('viewRenderer');
+        $view = \Zend_Controller_Action_HelperBroker::getStaticHelper('viewRenderer');
         if (null !== $view) {
             $view->setNoRender(true);
         }

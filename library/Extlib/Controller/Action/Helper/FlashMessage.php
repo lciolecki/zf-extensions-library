@@ -82,9 +82,9 @@ class FlashMessage extends \Zend_Controller_Action_Helper_Abstract
      */
     public function __construct()
     {
-        if (!self::$_session instanceof Zend_Session_Namespace) {
+        if (!self::$_session instanceof \Zend_Session_Namespace) {
 
-            self::$_session = new Zend_Session_Namespace($this->getName());
+            self::$_session = new \Zend_Session_Namespace($this->getName());
 
             if (self::$_session->{$this->_namespace} && is_array(self::$_session->{$this->_namespace}) &&
                     in_array(key(self::$_session->{$this->_namespace}), self::$_allowedTypes)) {
@@ -94,11 +94,11 @@ class FlashMessage extends \Zend_Controller_Action_Helper_Abstract
             unset(self::$_session->{$this->_namespace});
         }
 
-        if (Zend_Registry::isRegistered('Zend_Translate')) {
-            $translator = Zend_Registry::get('Zend_Translate');
-            if ($translator instanceof Zend_Translate_Adapter) {
+        if (\Zend_Registry::isRegistered('Zend_Translate')) {
+            $translator = \Zend_Registry::get('Zend_Translate');
+            if ($translator instanceof \Zend_Translate_Adapter) {
                 $this->_translator = $translator;
-            } elseif ($translator instanceof Zend_Translate) {
+            } elseif ($translator instanceof \Zend_Translate) {
                 $this->_translator = $translator->getAdapter();
             }
         }
@@ -152,7 +152,7 @@ class FlashMessage extends \Zend_Controller_Action_Helper_Abstract
             throw new \Zend_Controller_Action_Exception('Incorrect type of message!');
         }
 
-        if (!Zend_Validate::is($len, 'Int')) {
+        if (!\Zend_Validate::is($len, 'Int')) {
             throw new \Zend_Controller_Action_Exception("Param 'len' must be a int value!");
         }
 

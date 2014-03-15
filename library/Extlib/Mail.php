@@ -24,7 +24,7 @@ class Mail extends \Zend_Mail
     {
         $this->setType(\Zend_Mime::MULTIPART_RELATED);
 
-        $dom = new DOMDocument(null, $this->getCharset());
+        $dom = new \DOMDocument(null, $this->getCharset());
         @$dom->loadHTML($html);
 
         $images = $dom->getElementsByTagName('img');
@@ -33,7 +33,7 @@ class Mail extends \Zend_Mail
             $url = $img->getAttribute('src');
 
             try {
-                $client = new Zend_Http_Client($url);
+                $client = new \Zend_Http_Client($url);
                 $response = $client->request();
 
                 if ($response->getStatus() === 200) {
@@ -45,11 +45,11 @@ class Mail extends \Zend_Mail
                     $cid = md5($pathinfo['filename']);
                     $html = str_replace($url, 'cid:' . $cid, $html);
 
-                    $mime = new Zend_Mime_Part($imageContent);
+                    $mime = new \Zend_Mime_Part($imageContent);
                     $mime->id = $cid;
                     $mime->type = $mimeType;
-                    $mime->disposition = Zend_Mime::DISPOSITION_INLINE;
-                    $mime->encoding = Zend_Mime::ENCODING_BASE64;
+                    $mime->disposition = \Zend_Mime::DISPOSITION_INLINE;
+                    $mime->encoding = \Zend_Mime::ENCODING_BASE64;
                     $mime->filename = $pathinfo['basename'];
 
                     $this->addAttachment($mime);
