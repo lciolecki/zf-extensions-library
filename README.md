@@ -1,4 +1,4 @@
-zf-extensions-library
+Zend Framework Extensions Library
 =====================
 
 Extensions library for Zend Framework v1
