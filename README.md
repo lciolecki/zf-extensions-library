@@ -6,8 +6,8 @@ Extensions library for Zend Framework v1
 ##Installation using Composer
 
     {
+        "minimum-stability": "dev",
         "require": {
-            "lciolecki/php-library": "dev-master", 
             "lciolecki/zf-extensions-library" : "dev-master"
         }
     }
