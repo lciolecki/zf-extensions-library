@@ -72,7 +72,7 @@ class File extends \Zend_Controller_Action_Helper_Abstract
         }
 
         $this->disableViewAndLayout();
-        $this->options = array_merge_recursive($this->options, $params);
+        $this->options = array_merge($this->options, $params);
         
         if (null === $this->options['size']) {
             $this->options['size'] = filesize($filePath);
