@@ -72,11 +72,21 @@ class Doctrine2 implements \Zend_Auth_Adapter_Interface
     protected $conditions = array();
 
     /**
-     * Authentication result information
+     * Array of authentication result information
      *
-     * @var \Zend_Auth_Result
+     * @var array
      */
     protected $authenticateResultInfo = null;
+
+    /**
+     * Flag to indicate same Identity can be used with
+     * different credentials. Default is FALSE and need to be set to true to
+     * allow ambiguity usage.
+     *
+     *
+     * @var boolean
+     */
+    protected $ambiguityIdentity = false;
 
     /**
      * Constructor sets configuration options.
@@ -102,6 +112,35 @@ class Doctrine2 implements \Zend_Auth_Adapter_Interface
         if (null !== $credentialColumn) {
             $this->setCredentialColumn($credentialColumn);
         }
+    }
+
+    /**
+     * Sets a flag for usage of identical identities
+     * with unique credentials. It accepts integers (0, 1) or boolean (true,
+     * false) parameters. Default is false.
+     *
+     * @param  int|bool $flag
+     * @return \Extlib\Auth\Adapter\Doctrine2
+     */
+    public function setAmbiguityIdentity($flag)
+    {
+        if (is_integer($flag)) {
+            $this->ambiguityIdentity = (1 === $flag ? true : false);
+        } elseif (is_bool($flag)) {
+            $this->ambiguityIdentity = $flag;
+        }
+        return $this;
+    }
+
+    /**
+     * Returns TRUE for usage of multiple identical
+     * identies with different credentials, FALSE if not used.
+     *
+     * @return bool
+     */
+    public function getAmbiguityIdentity()
+    {
+        return $this->ambiguityIdentity;
     }
 
     /**
@@ -297,6 +336,16 @@ class Doctrine2 implements \Zend_Auth_Adapter_Interface
             return $authResult;
         }
 
+        if (true === $this->getAmbiguityIdentity()) {
+            $validIdentities = array();
+            foreach ($resultIdentities as $identity) {
+                if (1 === (int) $identity['zend_auth_credential_match']) {
+                    $validIdentities[] = $identity;
+                }
+            }
+            $resultIdentities = $validIdentities;
+        }
+
         $authResult = $this->_authenticateValidateResult(array_shift($resultIdentities));
         return $authResult;
     }
@@ -405,7 +454,7 @@ class Doctrine2 implements \Zend_Auth_Adapter_Interface
             $this->authenticateResultInfo['code'] = \Zend_Auth_Result::FAILURE_IDENTITY_NOT_FOUND;
             $this->authenticateResultInfo['messages'][] = 'A record with the supplied identity could not be found.';
             return $this->_authenticateCreateAuthResult();
-        } elseif (count($resultIdentities) > 1) {
+        } elseif (count($resultIdentities) > 1 && false === $this->getAmbiguityIdentity()) {
             $this->authenticateResultInfo['code'] = \Zend_Auth_Result::FAILURE_IDENTITY_AMBIGUOUS;
             $this->authenticateResultInfo['messages'][] = 'More than one record matches the supplied identity.';
             return $this->_authenticateCreateAuthResult();
