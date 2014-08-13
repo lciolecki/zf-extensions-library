@@ -2,9 +2,10 @@
 
 namespace Extlib\Auth\Adapter;
 
-
 /**
  * Auth adapter for Doctrine v 2.*
+ *
+ * @TODO getAmbiguityIdentity()
  *
  * @category        Extlib
  * @package         Extlib\Auth
@@ -69,6 +70,13 @@ class Doctrine2 implements \Zend_Auth_Adapter_Interface
      * @var array
      */
     protected $conditions = array();
+
+    /**
+     * Authentication result information
+     *
+     * @var \Zend_Auth_Result
+     */
+    protected $authenticateResultInfo = null;
 
     /**
      * Constructor sets configuration options.
@@ -282,44 +290,15 @@ class Doctrine2 implements \Zend_Auth_Adapter_Interface
     public function authenticate()
     {
         $this->_authenticateSetup();
-        $query = $this->_getQuery();
+        $dqlQuery = $this->_authenticateCreateSelect();
+        $resultIdentities = $this->_authenticateQueryDql($dqlQuery);
 
-        $authResult = array(
-            'code' => \Zend_Auth_Result::FAILURE,
-            'identity' => null,
-            'messages' => array()
-        );
-
-        try {
-            $result = $query->execute();
-
-            $resultCount = count($result);
-            if ($resultCount > 1) {
-                $authResult['code'] = \Zend_Auth_Result::FAILURE_IDENTITY_AMBIGUOUS;
-                $authResult['messages'][] = 'More than one entity matches the supplied identity.';
-            } else if ($resultCount < 1) {
-                $authResult['code'] = \Zend_Auth_Result::FAILURE_IDENTITY_NOT_FOUND;
-                $authResult['messages'][] = 'A record with the supplied identity could not be found.';
-            } else if (1 == $resultCount) {
-                if ($result[0][$this->credentialColumn] != $this->credential) {
-                    $authResult['code'] = \Zend_Auth_Result::FAILURE_CREDENTIAL_INVALID;
-                    $authResult['messages'][] = 'Supplied credential is invalid.';
-                } else {
-                    $authResult['code'] = \Zend_Auth_Result::SUCCESS;
-                    $authResult['identity'] = $this->identity;
-                    $authResult['messages'][] = 'Authentication successful.';
-                }
-            }
-        } catch (\Doctrine\ORM\Query\QueryException $qe) {
-            $authResult['code'] = \Zend_Auth_Result::FAILURE_UNCATEGORIZED;
-            $authResult['messages'][] = $qe->getMessage();
+        if (($authResult = $this->_authenticateValidateResultset($resultIdentities)) instanceof \Zend_Auth_Result) {
+            return $authResult;
         }
 
-        return new \Zend_Auth_Result(
-            $authResult['code'],
-            $authResult['identity'],
-            $authResult['messages']
-        );
+        $authResult = $this->_authenticateValidateResult(array_shift($resultIdentities));
+        return $authResult;
     }
 
     /**
@@ -334,56 +313,143 @@ class Doctrine2 implements \Zend_Auth_Adapter_Interface
         $exception = null;
 
         if (null === $this->em || !$this->em instanceof \Doctrine\ORM\EntityManager) {
-            $exception = 'A Doctrine2 EntityManager must be supplied for the Zend_Auth_Adapter_Doctrine2 authentication adapter.';
+            $exception = 'A Doctrine2 EntityManager must be supplied for the Extlib\Auth\Adapter\Doctrine2 authentication adapter.';
+        } elseif(empty($this->entityName)){
+            $exception = 'A entityName must be supplied for the Extlib\Auth\Adapter\Doctrine2 authentication adapter.';
         } elseif (empty($this->identityColumn)) {
-            $exception = 'An identity field must be supplied for the Zend_Auth_Adapter_Doctrine2 authentication adapter.';
+            $exception = 'An identity field must be supplied for the Extlib\Auth\Adapter\Doctrine2 authentication adapter.';
         } elseif (empty($this->credentialColumn)) {
-            $exception = 'A credential field must be supplied for the Zend_Auth_Adapter_Doctrine2 authentication adapter.';
+            $exception = 'A credential field must be supplied for the Extlib\Auth\Adapter\Doctrine2 authentication adapter.';
         } elseif (empty($this->identity)) {
-            $exception = 'A value for the identity was not provided prior to authentication with Zend_Auth_Adapter_Doctrine2.';
+            $exception = 'A value for the identity was not provided prior to authentication with Extlib\Auth\Adapter\Doctrine2.';
         } elseif (empty($this->credential)) {
-            $exception = 'A credential value was not provided prior to authentication with Zend_Auth_Adapter_Doctrine2.';
+            $exception = 'A credential value was not provided prior to authentication with Extlib\Auth\Adapter\Doctrine2.';
         }
 
         if (null !== $exception) {
-            /**
-             * @see \Zend_Auth_Adapter_Exception
-             */
             throw new \Zend_Auth_Adapter_Exception($exception);
         }
+
+        $this->authenticateResultInfo = array(
+            'code'      =>  \Zend_Auth_Result::FAILURE,
+            'identity'  =>  $this->getIdentity(),
+            'messages'  =>  array()
+        );
+
+        return true;
     }
 
     /**
      * Construct the Doctrine query.
      *
-     * @TODO credentialTreatment query
      * @return \Doctrine\ORM\Query
      */
-    protected function _getQuery()
+    protected function _authenticateCreateSelect()
     {
-        /**
-
-        if (empty($this->credentialTreatment) || (strpos($this->credentialTreatment, "?") === false)) {
+        if ($this->credentialTreatment === null) {
             $this->credentialTreatment = '?';
         }
 
-        $select = '(CASE WHEN' . $this->credentialColumn . ' = ' . str_replace('?', $this->getEm()->getConnection()->quote($this->credential), $this->credentialTreatment) . ') AS zend_auth_credential_match';
-        */
-
-        $allParameters = array('identity' => $this->getIdentity());
+        $select = sprintf(
+            '(CASE WHEN e.%s = %s THEN 1 ELSE 0 END) as zend_auth_credential_match',
+            $this->credentialColumn,
+            str_replace('?', $this->getEm()->getConnection()->quote($this->credential), $this->credentialTreatment)
+        );
 
         $qb = $this->em->createQueryBuilder()
-                       ->select('e.' . $this->credentialColumn)
+                       ->select($select)
                        ->from($this->entityName, 'e')
                        ->where('e.' . $this->identityColumn . ' = :identity');
 
-        foreach ($this->conditions as $condition => $parameters) {
+        $parameters = array('identity' => $this->getIdentity());
+        foreach ($this->conditions as $condition => $params) {
             $qb->andWhere('e.' . $condition);
-            $allParameters = array_merge($allParameters, $parameters);
+            $parameters = array_merge($parameters, $params);
         }
 
-        $qb->setParameters($allParameters);
+        $qb->setParameters($parameters);
 
         return $qb->getQuery();
+    }
+
+    /**
+     * Get result identities
+     *
+     * @param \Doctrine\ORM\Query $dqlQuery
+     * @return array
+     * @throws \Zend_Auth_Adapter_Exception
+     */
+    protected function _authenticateQueryDql(\Doctrine\ORM\Query $dqlQuery)
+    {
+        try {
+            $resultIdentities = $dqlQuery->getResult();
+        } catch (\Exception $e) {
+            throw new \Zend_Auth_Adapter_Exception('The supplied parameters to Extlib\Auth\Adapter\Doctrine2 failed to '
+                . 'produce a valid sql statement, please check table and column names '
+                . 'for validity.', 0, $e);
+        }
+
+        return $resultIdentities;
+    }
+
+    /**
+     * This method attempts to make
+     * certain that only one record was returned in the resultset
+     *
+     * @param array $resultIdentities
+     * @return true|\Zend_Auth_Result
+     */
+    protected function _authenticateValidateResultSet(array $resultIdentities)
+    {
+        if (count($resultIdentities) < 1) {
+            $this->authenticateResultInfo['code'] = \Zend_Auth_Result::FAILURE_IDENTITY_NOT_FOUND;
+            $this->authenticateResultInfo['messages'][] = 'A record with the supplied identity could not be found.';
+            return $this->_authenticateCreateAuthResult();
+        } elseif (count($resultIdentities) > 1) {
+            $this->authenticateResultInfo['code'] = \Zend_Auth_Result::FAILURE_IDENTITY_AMBIGUOUS;
+            $this->authenticateResultInfo['messages'][] = 'More than one record matches the supplied identity.';
+            return $this->_authenticateCreateAuthResult();
+        }
+
+        return true;
+    }
+
+    /**
+     * This method attempts to validate that
+     * the record in the resultset is indeed a record that matched the
+     * identity provided to this adapter.
+     *
+     * @param array $resultIdentity
+     * @return \Zend_Auth_Result
+     */
+    protected function _authenticateValidateResult($resultIdentity)
+    {
+        if ($resultIdentity['zend_auth_credential_match'] != '1') {
+            $this->authenticateResultInfo['code'] = \Zend_Auth_Result::FAILURE_CREDENTIAL_INVALID;
+            $this->authenticateResultInfo['messages'][] = 'Supplied credential is invalid.';
+            return $this->_authenticateCreateAuthResult();
+        }
+
+        unset($resultIdentity['zend_auth_credential_match']);
+        $this->_resultRow = $resultIdentity;
+
+        $this->authenticateResultInfo['code'] = \Zend_Auth_Result::SUCCESS;
+        $this->authenticateResultInfo['messages'][] = 'Authentication successful.';
+        return $this->_authenticateCreateAuthResult();
+    }
+
+    /**
+     * Creates a Zend_Auth_Result object from
+     * the information that has been collected during the authenticate() attempt.
+     *
+     * @return \Zend_Auth_Result
+     */
+    protected function _authenticateCreateAuthResult()
+    {
+        return new \Zend_Auth_Result(
+            $this->authenticateResultInfo['code'],
+            $this->authenticateResultInfo['identity'],
+            $this->authenticateResultInfo['messages']
+        );
     }
 }
