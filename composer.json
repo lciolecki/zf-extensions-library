@@ -20,7 +20,7 @@
             "Extlib\\": "library/",
             "ExtlibTest\\": "tests/"
         },
-        'psr-0': {
+        "psr-0": {
             "Extlib_Log_Writer": "library/Extlib/Log/Writer/"
         }
     }
