@@ -19,10 +19,6 @@
         "psr-0": {
             "Extlib\\": "library/",
             "ExtlibTest\\": "tests/"
-        },
-        "files": [
-            "library/Extlib/Log/Writer/DirStream.php",
-            "library/Extlib/Log/Writer/Doctrine.php"
-        ]
+        }
     }
 }
