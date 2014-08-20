@@ -21,7 +21,7 @@
             "ExtlibTest\\": "tests/"
         },
         'psr-0': {
-            "Extlib_Log_Writer": "library/Extlib/Log/Writer/",
+            "Extlib_Log_Writer": "library/Extlib/Log/Writer/"
         }
     }
 }
