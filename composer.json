@@ -16,10 +16,12 @@
         "zendframework/zendframework1": "1.*"
     },
     "autoload": {
-        "psr-0": {
-            "Extlib_Log_Writer": "library/Extlib/Log/Writer/", 
+        "psr-2": {
             "Extlib\\": "library/",
             "ExtlibTest\\": "tests/"
+        },
+        'psr-0': {
+            "Extlib_Log_Writer": "library/Extlib/Log/Writer/",
         }
     }
 }
