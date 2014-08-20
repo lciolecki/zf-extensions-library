@@ -20,8 +20,9 @@
             "Extlib\\": "library/",
             "ExtlibTest\\": "tests/"
         },
-        "psr-0": {
-            "Extlib_Log_Writer": "library/Extlib/Log/Writer/"
-        }
+        "files": [
+            "library/Extlib/Log/Writer/DirStream.php",
+            "library/Extlib/Log/Writer/Doctrine.php",
+        ]
     }
 }
