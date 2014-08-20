@@ -1,5 +1,7 @@
 <?php
 
+namespace Extlib\Log\Writer;
+
 /**
  * Doctrine v1.2 log writer (old namespace for zend support resource log)
  *
@@ -10,9 +12,8 @@
  * @modification    Lukasz Ciolecki <ciolecki.lukasz@gmail.com>
  * @copyright       Copyright (c) Matthew Lurz
  */
-class Extlib_Log_Writer_Doctrine extends \Zend_Log_Writer_Abstract
+class Doctrine extends \Zend_Log_Writer_Abstract
 {
-
     /**
      * Class model name
      * 
@@ -48,7 +49,7 @@ class Extlib_Log_Writer_Doctrine extends \Zend_Log_Writer_Abstract
      * Write a message to the log
      *
      * @param array $event
-     * @return \Extlib_Log_Writer_Doctrine
+     * @return \Extlib\Log\Writer\Doctrine
      */
     protected function _write($event)
     {
@@ -74,7 +75,7 @@ class Extlib_Log_Writer_Doctrine extends \Zend_Log_Writer_Abstract
      * Create a new instance of 
      *
      * @param  array|\Zend_Config $config
-     * @return \Extlib_Log_Writer_Doctrine
+     * @return \Extlib\Log\Writer\Doctrine
      */
     static public function factory($configs)
     {
@@ -97,7 +98,7 @@ class Extlib_Log_Writer_Doctrine extends \Zend_Log_Writer_Abstract
      * Set model class name
      * 
      * @param string $modelClass
-     * @return \Extlib_Log_Writer_Doctrine
+     * @return \Extlib\Log\Writer\Doctrine
      */
     public function setModelClass($modelClass)
     {
@@ -119,7 +120,7 @@ class Extlib_Log_Writer_Doctrine extends \Zend_Log_Writer_Abstract
      * Set model columns
      * 
      * @param array $columnMap
-     * @return \Extlib_Log_Writer_Doctrine
+     * @return \Extlib\Log\Writer\Doctrine
      */
     public function setColumnMap(array $columnMap)
     {

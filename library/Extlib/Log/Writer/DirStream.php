@@ -1,5 +1,7 @@
 <?php
 
+namespace Extlib\Log\Writer;
+
 /**
  * Log writer, create dir from current date and priority (old namespace for support zend resource log)
  *
@@ -9,9 +11,8 @@
  * @author      Lukasz Ciolecki <ciolecki.lukasz@gmail.com>
  * @copyright   Copyright (c) 2011 Lukasz Ciolecki (mart)
  */
-class Extlib_Log_Writer_DirStream extends \Zend_Log_Writer_Abstract
+class DirStream extends \Zend_Log_Writer_Abstract
 {
-
     /**
      * Default priority name
      */
@@ -76,7 +77,7 @@ class Extlib_Log_Writer_DirStream extends \Zend_Log_Writer_Abstract
      * Create a new instance of 
      *
      * @param  array|\Zend_Config $config
-     * @return Extlib_Log_Writer_DirStream
+     * @return \Extlib\Log\Writer\DirStream
      */
     static public function factory($config)
     {
@@ -90,7 +91,7 @@ class Extlib_Log_Writer_DirStream extends \Zend_Log_Writer_Abstract
      * Close the stream resource.
      * 
      * @param int $priorityName
-     * @return Extlib_Log_Writer_DirStream
+     * @return \Extlib\Log\Writer\DirStream
      */
     public function shutdown($priorityName = null)
     {
